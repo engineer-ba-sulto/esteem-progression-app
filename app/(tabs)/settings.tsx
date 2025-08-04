@@ -9,15 +9,12 @@ import {
   StarIcon,
 } from "@/components/icons";
 import SettingCard from "@/components/setting-card";
+import { router } from "expo-router";
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SettingsScreen() {
-  const handleReminderPress = () => {
-    console.log("リマインダー設定がタップされました");
-  };
-
   const handleAppearancePress = () => {
     console.log("外観設定がタップされました");
   };
@@ -60,7 +57,7 @@ export default function SettingsScreen() {
           <SettingCard
             icon={<BellIcon />}
             label="リマインダー"
-            onPress={handleReminderPress}
+            onPress={() => router.push("/settings/reminder")}
           />
           <SettingCard
             icon={<PaintBrushIcon />}
