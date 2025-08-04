@@ -1,5 +1,5 @@
-import DummyJsonData from "@/components/dummy-json-data";
+import OnboardingScreen from "@/components/onboarding";
 
 export default function Index() {
-  return <DummyJsonData />;
+  return <OnboardingScreen />;
 }
