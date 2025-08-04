@@ -43,7 +43,7 @@ export default function HomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-blue-50" edges={["top"]}>
       {/* Header with Date Navigation */}
-      <View className="flex-shrink-0 text-center mb-8 px-4 pt-6 bg-white pb-4 rounded-3xl shadow-sm">
+      <View className="flex-shrink-0 text-center mb-8 px-4 pt-6 bg-white pb-4 rounded-3xl shadow-sm h-24">
         <View className="flex-row items-center justify-between">
           <ArrowButton
             onPress={handlePrevDay}
