@@ -26,7 +26,7 @@ export default function RootLayout() {
       <SQLiteProvider databaseName={DATABASE_NAME} useSuspense>
         <Stack>
           <Stack.Screen
-            name="index"
+            name="(tabs)"
             options={{ title: "Home", headerShown: false }}
           />
         </Stack>
