@@ -1,105 +1,124 @@
 import { completedDates } from "@/constants/mock-cal";
 import React, { useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
-import { ChevronLeftIcon, ChevronRightIcon } from "./icons";
+import { Text, View } from "react-native";
+import { Calendar, LocaleConfig } from "react-native-calendars";
+
+// 日本語ロケールの設定
+LocaleConfig.locales["ja"] = {
+  monthNames: [
+    "1月",
+    "2月",
+    "3月",
+    "4月",
+    "5月",
+    "6月",
+    "7月",
+    "8月",
+    "9月",
+    "10月",
+    "11月",
+    "12月",
+  ],
+  monthNamesShort: [
+    "1月",
+    "2月",
+    "3月",
+    "4月",
+    "5月",
+    "6月",
+    "7月",
+    "8月",
+    "9月",
+    "10月",
+    "11月",
+    "12月",
+  ],
+  dayNames: [
+    "日曜日",
+    "月曜日",
+    "火曜日",
+    "水曜日",
+    "木曜日",
+    "金曜日",
+    "土曜日",
+  ],
+  dayNamesShort: ["日", "月", "火", "水", "木", "金", "土"],
+  today: "今日",
+};
+
+// デフォルトロケールを日本語に設定
+LocaleConfig.defaultLocale = "ja";
 
 export default function CalendarView() {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState("");
 
-  const handlePrevMonth = () => {
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
-    );
-  };
+  // 完了した日付をマーク用のオブジェクトに変換
+  const markedDates = completedDates.reduce(
+    (acc, date) => {
+      const dateString = date.toISOString().split("T")[0]; // YYYY-MM-DD形式
+      acc[dateString] = {
+        marked: true,
+        dotColor: "#3B82F6", // blue-500
+        selected: false,
+      };
+      return acc;
+    },
+    {} as { [key: string]: any }
+  );
 
-  const handleNextMonth = () => {
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
-    );
-  };
+  // 今日の日付をマーク
+  const today = new Date().toISOString().split("T")[0];
+  if (markedDates[today]) {
+    markedDates[today].selected = true;
+    markedDates[today].selectedColor = "#3B82F6";
+  } else {
+    markedDates[today] = {
+      selected: true,
+      selectedColor: "#3B82F6",
+    };
+  }
 
-  const handleDateLongPress = (day: number) => {
-    const selectedDate = new Date(year, month, day);
-    console.log(
-      `長押しされた日付: ${selectedDate.getFullYear()}年${selectedDate.getMonth() + 1}月${selectedDate.getDate()}日`
-    );
-  };
-
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
-
-  const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0 for Sunday, 1 for Monday, etc.
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-  const dayLabels = ["日", "月", "火", "水", "木", "金", "土"];
-
-  const isSameDay = (d1: Date, d2: Date) => {
-    return (
-      d1.getFullYear() === d2.getFullYear() &&
-      d1.getMonth() === d2.getMonth() &&
-      d1.getDate() === d2.getDate()
-    );
+  const handleDayPress = (day: any) => {
+    console.log(`選択された日付: ${day.year}年${day.month}月${day.day}日`);
+    setSelectedDate(day.dateString);
   };
 
   return (
-    <View className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-      <View className="flex flex-row justify-between items-center mb-4">
-        <TouchableOpacity
-          onPress={handlePrevMonth}
-          className="p-2 rounded-full"
-        >
-          <ChevronLeftIcon />
-        </TouchableOpacity>
-        <Text className="font-bold text-lg">{`${year}年 ${month + 1}月`}</Text>
-        <TouchableOpacity
-          onPress={handleNextMonth}
-          className="p-2 rounded-full"
-        >
-          <ChevronRightIcon />
-        </TouchableOpacity>
-      </View>
-      <View className="flex flex-row text-center text-xs text-gray-500 font-semibold mb-2">
-        {dayLabels.map((label) => (
-          <Text
-            key={label}
-            className="flex-1 text-center text-xs text-gray-500 font-semibold"
-          >
-            {label}
-          </Text>
-        ))}
-      </View>
-      <View className="flex flex-row flex-wrap">
-        {Array.from({ length: firstDayOfMonth }).map((_, index) => (
-          <View key={`pad-${index}`} className="w-[14.28%] h-10" />
-        ))}
-        {Array.from({ length: daysInMonth }).map((_, index) => {
-          const day = index + 1;
-          const dayDate = new Date(year, month, day);
-          const today = new Date();
-          const isToday = isSameDay(dayDate, today);
-          const isCompleted = completedDates.some((d) => isSameDay(d, dayDate));
-
+    <View className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <Calendar
+        current={new Date().toISOString().split("T")[0]}
+        markedDates={markedDates}
+        onDayPress={handleDayPress}
+        theme={{
+          backgroundColor: "#ffffff",
+          calendarBackground: "#ffffff",
+          textSectionTitleColor: "#374151",
+          selectedDayBackgroundColor: "#3B82F6",
+          selectedDayTextColor: "#ffffff",
+          todayTextColor: "#3B82F6",
+          dayTextColor: "#374151",
+          textDisabledColor: "#D1D5DB",
+          dotColor: "#3B82F6",
+          selectedDotColor: "#ffffff",
+          arrowColor: "#3B82F6",
+          monthTextColor: "#374151",
+          indicatorColor: "#3B82F6",
+        }}
+        enableSwipeMonths={true}
+        firstDay={0}
+        hideExtraDays={true}
+        renderHeader={(date) => {
+          const year = date.getFullYear();
+          const month = date.getMonth() + 1;
           return (
-            <TouchableOpacity
-              key={day}
-              className="w-[14.28%] h-10 flex items-center justify-center"
-              onLongPress={() => handleDateLongPress(day)}
-              delayLongPress={500}
-            >
-              <View
-                className={`flex items-center justify-center w-9 h-9 rounded-full relative ${isToday ? "border-2 border-blue-500" : ""}`}
-              >
-                {isCompleted && (
-                  <View className="absolute w-8 h-8 bg-blue-100 rounded-full" />
-                )}
-                <Text className="relative z-10 text-gray-700">
-                  {day}
-                </Text>
-              </View>
-            </TouchableOpacity>
+            <View className="py-4">
+              <Text className="text-center text-lg font-bold text-gray-900">
+                {year}年{month}月
+              </Text>
+            </View>
           );
-        })}
-      </View>
+        }}
+      />
     </View>
   );
 }
