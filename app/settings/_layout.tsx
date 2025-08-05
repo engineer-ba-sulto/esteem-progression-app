@@ -4,6 +4,7 @@ export default function ReminderLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="reminder" />
+      <Stack.Screen name="subscription" />
     </Stack>
   );
 }
