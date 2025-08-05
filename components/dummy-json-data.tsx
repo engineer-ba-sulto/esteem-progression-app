@@ -5,7 +5,7 @@ import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 
-export default function Home() {
+export default function DummyJsonData() {
   const [tasks, setTasks] = useState<Task[]>([]);
 
   const db = useSQLiteContext();

@@ -24,11 +24,8 @@ export default function RootLayout() {
   return (
     <Suspense fallback={<ActivityIndicator size="large" />}>
       <SQLiteProvider databaseName={DATABASE_NAME} useSuspense>
-        <Stack>
-          <Stack.Screen
-            name="index"
-            options={{ title: "Home", headerShown: false }}
-          />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" options={{ title: "Home" }} />
         </Stack>
       </SQLiteProvider>
     </Suspense>

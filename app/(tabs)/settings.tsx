@@ -1,0 +1,113 @@
+import AdBanner from "@/components/adbanner";
+import {
+  ArrowLeftOnRectangleIcon,
+  ArrowUpTrayIcon,
+  BellIcon,
+  QuestionMarkCircleIcon,
+  ShieldCheckIcon,
+  StarIcon,
+  TrashIcon,
+} from "@/components/icons";
+import SettingCard from "@/components/setting-card";
+import { router } from "expo-router";
+import React from "react";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+export default function SettingsScreen() {
+  const handleHelpPress = () => {
+    console.log("ヘルプとフィードバックがタップされました");
+  };
+
+  const handleLogoutPress = () => {
+    console.log("ログアウトがタップされました");
+  };
+
+  const handleDataDeletionPress = () => {
+    Alert.alert(
+      "データ削除の確認",
+      "すべてのデータを削除しますか？この操作は取り消せません。",
+      [
+        {
+          text: "キャンセル",
+          style: "cancel",
+        },
+        {
+          text: "削除",
+          style: "destructive",
+          onPress: () => {
+            console.log("データ削除が実行されました");
+            // 実際のデータ削除処理をここに実装
+          },
+        },
+      ]
+    );
+  };
+
+  return (
+    <SafeAreaView className="flex flex-col h-full bg-blue-50" edges={["top"]}>
+      {/* Header */}
+      <View className="p-4 flex-shrink-0 bg-white rounded-3xl shadow-sm h-24 flex items-center justify-center">
+        <Text className="text-2xl font-bold text-gray-800 text-center">
+          設定
+        </Text>
+      </View>
+
+      {/* Main Content */}
+      <ScrollView className="flex-1 p-4">
+        <View className="mt-6">
+          <Text className="px-4 text-sm font-semibold text-gray-500 mb-2">
+            一般
+          </Text>
+          <SettingCard
+            icon={<StarIcon />}
+            label="サブスクリプション"
+            onPress={() => router.push("/settings/subscription")}
+          />
+          <SettingCard
+            icon={<BellIcon />}
+            label="リマインダー"
+            onPress={() => router.push("/settings/reminder")}
+          />
+          <Text className="px-4 mt-6 text-sm font-semibold text-gray-500 mb-2">
+            データ管理
+          </Text>
+          <SettingCard
+            icon={<ArrowUpTrayIcon />}
+            label="バックアップ"
+            onPress={() => router.push("/settings/backup")}
+          />
+          <SettingCard
+            icon={<TrashIcon />}
+            label="データを削除"
+            onPress={handleDataDeletionPress}
+          />
+          <Text className="px-4 mt-6 text-sm font-semibold text-gray-500 mb-2">
+            サポート
+          </Text>
+          <SettingCard
+            icon={<ShieldCheckIcon />}
+            label="ポリシー"
+            onPress={() => router.push("/settings/privacy")}
+          />
+          <SettingCard
+            icon={<QuestionMarkCircleIcon />}
+            label="ヘルプとフィードバック"
+            onPress={handleHelpPress}
+          />
+        </View>
+
+        <View className="text-center mt-8">
+          <TouchableOpacity
+            className="flex flex-row items-center justify-center w-full max-w-xs mx-auto py-3 px-6 bg-white rounded-lg border border-gray-200"
+            onPress={handleLogoutPress}
+          >
+            <ArrowLeftOnRectangleIcon />
+            <Text className="text-red-500 font-semibold ml-2">ログアウト</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+      <AdBanner />
+    </SafeAreaView>
+  );
+}
