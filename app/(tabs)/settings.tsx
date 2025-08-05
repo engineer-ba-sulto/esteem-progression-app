@@ -19,10 +19,6 @@ export default function SettingsScreen() {
     console.log("外観設定がタップされました");
   };
 
-  const handleBackupPress = () => {
-    console.log("バックアップ設定がタップされました");
-  };
-
   const handlePrivacyPress = () => {
     console.log("プライバシー設定がタップされました");
   };
@@ -72,7 +68,7 @@ export default function SettingsScreen() {
           <SettingCard
             icon={<ArrowUpTrayIcon />}
             label="バックアップ"
-            onPress={handleBackupPress}
+            onPress={() => router.push("/settings/backup")}
           />
 
           <Text className="px-4 mt-6 text-sm font-semibold text-gray-500 mb-2">
