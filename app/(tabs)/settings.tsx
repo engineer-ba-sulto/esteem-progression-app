@@ -7,20 +7,17 @@ import {
   QuestionMarkCircleIcon,
   ShieldCheckIcon,
   StarIcon,
+  TrashIcon,
 } from "@/components/icons";
 import SettingCard from "@/components/setting-card";
 import { router } from "expo-router";
 import React from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SettingsScreen() {
   const handleAppearancePress = () => {
     console.log("外観設定がタップされました");
-  };
-
-  const handlePrivacyPress = () => {
-    console.log("プライバシー設定がタップされました");
   };
 
   const handleHelpPress = () => {
@@ -29,6 +26,27 @@ export default function SettingsScreen() {
 
   const handleLogoutPress = () => {
     console.log("ログアウトがタップされました");
+  };
+
+  const handleDataDeletionPress = () => {
+    Alert.alert(
+      "データ削除の確認",
+      "すべてのデータを削除しますか？この操作は取り消せません。",
+      [
+        {
+          text: "キャンセル",
+          style: "cancel",
+        },
+        {
+          text: "削除",
+          style: "destructive",
+          onPress: () => {
+            console.log("データ削除が実行されました");
+            // 実際のデータ削除処理をここに実装
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -70,6 +88,11 @@ export default function SettingsScreen() {
             label="バックアップ"
             onPress={() => router.push("/settings/backup")}
           />
+          <SettingCard
+            icon={<TrashIcon />}
+            label="データを削除"
+            onPress={handleDataDeletionPress}
+          />
 
           <Text className="px-4 mt-6 text-sm font-semibold text-gray-500 mb-2">
             サポート
@@ -77,7 +100,7 @@ export default function SettingsScreen() {
           <SettingCard
             icon={<ShieldCheckIcon />}
             label="プライバシー"
-            onPress={handlePrivacyPress}
+            onPress={() => router.push("/settings/privacy")}
           />
           <SettingCard
             icon={<QuestionMarkCircleIcon />}
