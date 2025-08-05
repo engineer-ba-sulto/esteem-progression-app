@@ -65,6 +65,11 @@ export default function SettingsScreen() {
             一般
           </Text>
           <SettingCard
+            icon={<StarIcon />}
+            label="サブスクリプション"
+            onPress={() => router.push("/settings/subscription")}
+          />
+          <SettingCard
             icon={<BellIcon />}
             label="リマインダー"
             onPress={() => router.push("/settings/reminder")}
@@ -74,12 +79,6 @@ export default function SettingsScreen() {
             label="外観"
             onPress={handleAppearancePress}
           />
-          <SettingCard
-            icon={<StarIcon />}
-            label="サブスクリプション"
-            onPress={() => router.push("/settings/subscription")}
-          />
-
           <Text className="px-4 mt-6 text-sm font-semibold text-gray-500 mb-2">
             データ管理
           </Text>
@@ -93,13 +92,12 @@ export default function SettingsScreen() {
             label="データを削除"
             onPress={handleDataDeletionPress}
           />
-
           <Text className="px-4 mt-6 text-sm font-semibold text-gray-500 mb-2">
             サポート
           </Text>
           <SettingCard
             icon={<ShieldCheckIcon />}
-            label="プライバシー"
+            label="ポリシー"
             onPress={() => router.push("/settings/privacy")}
           />
           <SettingCard

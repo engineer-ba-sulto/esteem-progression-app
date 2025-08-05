@@ -1,11 +1,5 @@
 import { Stack } from "expo-router";
 
 export default function ReminderLayout() {
-  return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="reminder" />
-      <Stack.Screen name="subscription" />
-      <Stack.Screen name="backup" />
-    </Stack>
-  );
+  return <Stack screenOptions={{ headerShown: false }} />;
 }

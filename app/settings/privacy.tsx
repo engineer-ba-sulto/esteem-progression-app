@@ -20,6 +20,11 @@ export default function PrivacyScreen() {
     console.log("利用規約がタップされました");
   };
 
+  const handleBusinessRegistrationPress = () => {
+    // 利用規約の詳細画面に遷移
+    console.log("特定商取引法などに基づく表示がタップされました");
+  };
+
   const handleBackPress = () => {
     router.back();
   };
@@ -32,7 +37,7 @@ export default function PrivacyScreen() {
           <TouchableOpacity onPress={handleBackPress} className="p-2">
             <ArrowLeftIcon />
           </TouchableOpacity>
-          <Text className="text-2xl font-bold text-gray-800">プライバシー</Text>
+          <Text className="text-2xl font-bold text-gray-800">ポリシー</Text>
           <View className="w-10" />
         </View>
       </View>
@@ -41,9 +46,6 @@ export default function PrivacyScreen() {
       <ScrollView className="flex-1 p-4">
         <View className="mt-6">
           {/* ポリシーセクション */}
-          <Text className="px-4 text-sm font-semibold text-gray-500 mb-2">
-            ポリシー
-          </Text>
           <SettingCard
             icon={<DocumentTextIcon />}
             label="プライバシーポリシー"
@@ -53,6 +55,11 @@ export default function PrivacyScreen() {
             icon={<DocumentTextIcon />}
             label="利用規約"
             onPress={handleTermsOfServicePress}
+          />
+          <SettingCard
+            icon={<DocumentTextIcon />}
+            label="特定商取引法などに基づく表示"
+            onPress={handleBusinessRegistrationPress}
           />
 
           {/* 情報セクション */}
