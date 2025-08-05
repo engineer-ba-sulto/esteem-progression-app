@@ -3,7 +3,6 @@ import {
   ArrowLeftOnRectangleIcon,
   ArrowUpTrayIcon,
   BellIcon,
-  PaintBrushIcon,
   QuestionMarkCircleIcon,
   ShieldCheckIcon,
   StarIcon,
@@ -16,10 +15,6 @@ import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SettingsScreen() {
-  const handleAppearancePress = () => {
-    console.log("外観設定がタップされました");
-  };
-
   const handleHelpPress = () => {
     console.log("ヘルプとフィードバックがタップされました");
   };
@@ -73,11 +68,6 @@ export default function SettingsScreen() {
             icon={<BellIcon />}
             label="リマインダー"
             onPress={() => router.push("/settings/reminder")}
-          />
-          <SettingCard
-            icon={<PaintBrushIcon />}
-            label="外観"
-            onPress={handleAppearancePress}
           />
           <Text className="px-4 mt-6 text-sm font-semibold text-gray-500 mb-2">
             データ管理
