@@ -178,6 +178,27 @@ const ja = {
     save: "保存",
     settingsSaved: "通知設定を保存しました",
   },
+  backup: {
+    title: "バックアップ",
+    createBackup: "データをバックアップ",
+    createBackupDescription: "設定とタスク履歴を安全に保存できます",
+    createBackupButton: "バックアップ作成",
+    restoreBackup: "バックアップから復元",
+    restoreBackupDescription: "以前のデータを復元できます",
+    selectFileButton: "ファイルを選択",
+    lastBackup: "最終バックアップ:",
+    createBackupAlert: "バックアップ作成",
+    createBackupMessage: "データのバックアップを作成しますか？",
+    restoreBackupAlert: "バックアップ復元",
+    restoreBackupMessage:
+      "バックアップファイルを選択して復元しますか？\n\n注意: 現在のデータは上書きされます",
+    backupCompleted: "完了",
+    backupCreatedMessage: "バックアップが正常に作成されました",
+    backupRestoredMessage: "バックアップが正常に復元されました",
+    notes: "注意事項",
+    notesDescription:
+      "• バックアップには設定とタスク履歴が含まれます\n• 復元時は現在のデータが上書きされます\n• 定期的なバックアップを推奨します",
+  },
 };
 
 // 英語の翻訳
@@ -356,6 +377,27 @@ const en = {
     confirm: "Confirm",
     save: "Save",
     settingsSaved: "Notification settings saved",
+  },
+  backup: {
+    title: "Backup",
+    createBackup: "Backup Data",
+    createBackupDescription: "Safely save your settings and task history",
+    createBackupButton: "Create Backup",
+    restoreBackup: "Restore from Backup",
+    restoreBackupDescription: "Restore previous data",
+    selectFileButton: "Select File",
+    lastBackup: "Last Backup:",
+    createBackupAlert: "Create Backup",
+    createBackupMessage: "Do you want to create a backup of your data?",
+    restoreBackupAlert: "Restore Backup",
+    restoreBackupMessage:
+      "Select a backup file to restore?\n\nNote: Current data will be overwritten",
+    backupCompleted: "Completed",
+    backupCreatedMessage: "Backup created successfully",
+    backupRestoredMessage: "Backup restored successfully",
+    notes: "Notes",
+    notesDescription:
+      "• Backup includes settings and task history\n• Current data will be overwritten during restore\n• Regular backups are recommended",
   },
 };
 
