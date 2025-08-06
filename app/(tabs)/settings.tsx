@@ -114,8 +114,8 @@ export default function SettingsScreen() {
           </Text>
           <SettingCard
             icon={<ShieldCheckIcon />}
-            label={t("settings.privacy")}
-            onPress={() => router.push("/settings/privacy")}
+            label={t("settings.policy")}
+            onPress={() => router.push("/settings/policy")}
           />
           <SettingCard
             icon={<QuestionMarkCircleIcon />}

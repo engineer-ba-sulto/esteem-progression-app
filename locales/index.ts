@@ -102,7 +102,7 @@ const ja = {
     languageChanged: "言語が変更されました",
     currentLanguage: "現在の言語",
     notifications: "通知",
-    privacy: "プライバシー",
+    policy: "ポリシー",
     backup: "バックアップ",
     subscription: "サブスクリプション",
     deleteData: "データを削除",
@@ -198,6 +198,14 @@ const ja = {
     notes: "注意事項",
     notesDescription:
       "• バックアップには設定とタスク履歴が含まれます\n• 復元時は現在のデータが上書きされます\n• 定期的なバックアップを推奨します",
+  },
+  policy: {
+    title: "ポリシー",
+    privacyPolicy: "プライバシーポリシー",
+    termsOfService: "利用規約",
+    businessRegistration: "特定商取引法などに基づく表示",
+    privacyProtection: "プライバシーの保護",
+    privacyDescription: "私たちはあなたのプライバシーを大切にしています。収集されたデータは暗号化され、安全に保管されます。詳細についてはプライバシーポリシーをご確認ください。",
   },
 };
 
@@ -302,7 +310,7 @@ const en = {
     languageChanged: "Language changed",
     currentLanguage: "Current language",
     notifications: "Notifications",
-    privacy: "Privacy",
+    policy: "Policy",
     backup: "Backup",
     subscription: "Subscription",
     deleteData: "Delete Data",
@@ -398,6 +406,14 @@ const en = {
     notes: "Notes",
     notesDescription:
       "• Backup includes settings and task history\n• Current data will be overwritten during restore\n• Regular backups are recommended",
+  },
+  policy: {
+    title: "Policy",
+    privacyPolicy: "Privacy Policy",
+    termsOfService: "Terms of Service",
+    businessRegistration: "Business Registration Information",
+    privacyProtection: "Privacy Protection",
+    privacyDescription: "We value your privacy. Collected data is encrypted and stored securely. Please check the privacy policy for details.",
   },
 };
 
