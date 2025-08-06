@@ -3,18 +3,22 @@ import {
   ArrowLeftOnRectangleIcon,
   ArrowUpTrayIcon,
   BellIcon,
+  LanguageIcon,
   QuestionMarkCircleIcon,
   ShieldCheckIcon,
   StarIcon,
   TrashIcon,
 } from "@/components/icons";
 import SettingCard from "@/components/setting-card";
+import { useLocalization } from "@/utils/localization-context";
 import { router } from "expo-router";
 import React from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SettingsScreen() {
+  const { t, locale, changeLocale, getAvailableLocales } = useLocalization();
+
   const handleHelpPress = () => {
     console.log("ヘルプとフィードバックがタップされました");
   };
@@ -23,17 +27,35 @@ export default function SettingsScreen() {
     console.log("ログアウトがタップされました");
   };
 
+  const handleLanguagePress = () => {
+    const availableLocales = getAvailableLocales();
+    const currentLocale = locale;
+
+    // 現在の言語の次の言語に切り替え
+    const currentIndex = availableLocales.indexOf(currentLocale);
+    const nextIndex = (currentIndex + 1) % availableLocales.length;
+    const newLocale = availableLocales[nextIndex];
+
+    changeLocale(newLocale);
+
+    Alert.alert(
+      t("settings.languageChanged"),
+      `${t("settings.currentLanguage")}: ${newLocale === "ja" ? "日本語" : "English"}`,
+      [{ text: t("common.confirm"), style: "default" }]
+    );
+  };
+
   const handleDataDeletionPress = () => {
     Alert.alert(
-      "データ削除の確認",
-      "すべてのデータを削除しますか？この操作は取り消せません。",
+      t("settings.dataDeletionTitle"),
+      t("settings.dataDeletionMessage"),
       [
         {
-          text: "キャンセル",
+          text: t("common.cancel"),
           style: "cancel",
         },
         {
-          text: "削除",
+          text: t("common.delete"),
           style: "destructive",
           onPress: () => {
             console.log("データ削除が実行されました");
@@ -49,7 +71,7 @@ export default function SettingsScreen() {
       {/* Header */}
       <View className="p-4 flex-shrink-0 bg-white rounded-3xl shadow-sm h-24 flex items-center justify-center">
         <Text className="text-2xl font-bold text-gray-800 text-center">
-          設定
+          {t("settings.title")}
         </Text>
       </View>
 
@@ -57,42 +79,47 @@ export default function SettingsScreen() {
       <ScrollView className="flex-1 p-4">
         <View className="mt-6">
           <Text className="px-4 text-sm font-semibold text-gray-500 mb-2">
-            一般
+            {t("settings.general")}
           </Text>
           <SettingCard
+            icon={<LanguageIcon />}
+            label={`${t("settings.language")} (${locale === "ja" ? "日本語" : "English"})`}
+            onPress={handleLanguagePress}
+          />
+          <SettingCard
             icon={<StarIcon />}
-            label="サブスクリプション"
+            label={t("settings.subscription")}
             onPress={() => router.push("/settings/subscription")}
           />
           <SettingCard
             icon={<BellIcon />}
-            label="リマインダー"
+            label={t("settings.notifications")}
             onPress={() => router.push("/settings/reminder")}
           />
           <Text className="px-4 mt-6 text-sm font-semibold text-gray-500 mb-2">
-            データ管理
+            {t("settings.dataManagement")}
           </Text>
           <SettingCard
             icon={<ArrowUpTrayIcon />}
-            label="バックアップ"
+            label={t("settings.backup")}
             onPress={() => router.push("/settings/backup")}
           />
           <SettingCard
             icon={<TrashIcon />}
-            label="データを削除"
+            label={t("settings.deleteData")}
             onPress={handleDataDeletionPress}
           />
           <Text className="px-4 mt-6 text-sm font-semibold text-gray-500 mb-2">
-            サポート
+            {t("settings.support")}
           </Text>
           <SettingCard
             icon={<ShieldCheckIcon />}
-            label="ポリシー"
+            label={t("settings.privacy")}
             onPress={() => router.push("/settings/privacy")}
           />
           <SettingCard
             icon={<QuestionMarkCircleIcon />}
-            label="ヘルプとフィードバック"
+            label={t("settings.helpAndFeedback")}
             onPress={handleHelpPress}
           />
         </View>
@@ -103,7 +130,9 @@ export default function SettingsScreen() {
             onPress={handleLogoutPress}
           >
             <ArrowLeftOnRectangleIcon />
-            <Text className="text-red-500 font-semibold ml-2">ログアウト</Text>
+            <Text className="text-red-500 font-semibold ml-2">
+              {t("settings.logout")}
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

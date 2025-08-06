@@ -1,9 +1,10 @@
 import AdBanner from "@/components/adbanner";
 import ArrowButton from "@/components/arrow-button";
-import { dayLabels } from "@/constants/day-labels";
+import { useDayLabels } from "@/constants/day-labels";
 import { mockTasks } from "@/constants/mock-tasks";
 import { Day } from "@/types/day";
 import { getFormattedDate } from "@/utils/date";
+import { useLocalization } from "@/utils/localization-context";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
@@ -12,6 +13,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function HomeScreen() {
   const [tasks, setTasks] = useState(mockTasks);
   const [currentDay, setCurrentDay] = useState<Day>("today");
+  const { t } = useLocalization();
+
+  // ローカライゼーションされたday-labelsを取得
+  const dayLabels = useDayLabels();
 
   const task = tasks[currentDay];
 
@@ -52,7 +57,8 @@ export default function HomeScreen() {
           />
           <View className="text-center">
             <Text className="text-2xl font-bold text-center">
-              {dayLabels[currentDay]}のタスク
+              {dayLabels[currentDay]}
+              {t("tasks.title")}
             </Text>
             <Text className="text-gray-500 text-sm text-center">
               {getFormattedDate(currentDay)}
@@ -84,26 +90,28 @@ export default function HomeScreen() {
               onPress={handleComplete}
               className="mt-8 w-full max-w-xs py-4 bg-blue-600 rounded-xl shadow-lg"
             >
-              <Text className="text-white font-bold text-center">完了する</Text>
+              <Text className="text-white font-bold text-center">
+                {t("tasks.completed")}
+              </Text>
             </TouchableOpacity>
           </View>
         ) : task && task.completed ? (
           <View className="text-center">
-            <Text className="text-7xl mb-6">🎉</Text>
+            <Text className="text-7xl text-center mb-6">🎉</Text>
             <Text className="text-3xl font-bold text-gray-900 text-center">
-              達成おめでとうございます！
+              {t("home.congratulations")}
             </Text>
             <Text className="text-gray-600 mt-2 text-center">
-              素晴らしい一日でしたね。
+              {t("home.greatDay")}
             </Text>
             <TouchableOpacity onPress={handleReset}>
               <Text className="mt-6 text-blue-500 text-center">
-                デモをリセット
+                {t("home.resetDemo")}
               </Text>
             </TouchableOpacity>
           </View>
         ) : (
-          <EmptyStateScreenInternal day={currentDay} />
+          <EmptyStateScreenInternal day={currentDay} dayLabels={dayLabels} />
         )}
       </View>
       <AdBanner />
@@ -111,21 +119,28 @@ export default function HomeScreen() {
   );
 }
 
-const EmptyStateScreenInternal: React.FC<{ day: Day }> = ({ day }) => {
+const EmptyStateScreenInternal: React.FC<{
+  day: Day;
+  dayLabels: Record<Day, string>;
+}> = ({ day, dayLabels }) => {
+  const { t } = useLocalization();
+
   return (
     <View className="flex flex-col items-center justify-center text-center p-8">
       <View className="w-40 h-40 flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 rounded-full mb-6 border-2 border-gray-200">
         <Ionicons name="document-outline" size={80} color="#60A5FA" />
       </View>
       <Text className="text-2xl font-bold text-gray-800 text-center">
-        準備はいいですか？
+        {t("home.readyMessage")}
       </Text>
-      <Text className="text-gray-600 mt-2 max-w-xs text-center">{`さあ、${dayLabels[day]}のタスクを決めて、素晴らしい一日を始めましょう。`}</Text>
+      <Text className="text-gray-600 mt-2 max-w-xs text-center">
+        {t("home.motivationMessage", { day: dayLabels[day] })}
+      </Text>
 
       <TouchableOpacity className="mt-8 flex-row items-center justify-center h-12 w-auto px-8 bg-blue-600 rounded-xl shadow-lg">
         <Ionicons name="add" size={24} color="white" />
         <Text className="font-semibold text-white ml-2">
-          {`${dayLabels[day]}のタスクを設定`}
+          {t("home.setTaskButton", { day: dayLabels[day] })}
         </Text>
       </TouchableOpacity>
     </View>

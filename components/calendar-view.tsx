@@ -1,56 +1,119 @@
 import { completedDates } from "@/constants/mock-cal";
-import React, { useState } from "react";
+import { useLocalization } from "@/utils/localization-context";
+import React, { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { Calendar, LocaleConfig } from "react-native-calendars";
 
-// 日本語ロケールの設定
-LocaleConfig.locales["ja"] = {
-  monthNames: [
-    "1月",
-    "2月",
-    "3月",
-    "4月",
-    "5月",
-    "6月",
-    "7月",
-    "8月",
-    "9月",
-    "10月",
-    "11月",
-    "12月",
-  ],
-  monthNamesShort: [
-    "1月",
-    "2月",
-    "3月",
-    "4月",
-    "5月",
-    "6月",
-    "7月",
-    "8月",
-    "9月",
-    "10月",
-    "11月",
-    "12月",
-  ],
-  dayNames: [
-    "日曜日",
-    "月曜日",
-    "火曜日",
-    "水曜日",
-    "木曜日",
-    "金曜日",
-    "土曜日",
-  ],
-  dayNamesShort: ["日", "月", "火", "水", "木", "金", "土"],
-  today: "今日",
-};
-
-// デフォルトロケールを日本語に設定
-LocaleConfig.defaultLocale = "ja";
-
 export default function CalendarView() {
   const [selectedDate, setSelectedDate] = useState("");
+  const { t, locale } = useLocalization();
+
+  useEffect(() => {
+    // カレンダーのロケール設定を更新
+    updateCalendarLocale(locale);
+  }, [locale]);
+
+  const updateCalendarLocale = (currentLocale: string) => {
+    // 翻訳を直接取得
+    const monthNames =
+      currentLocale === "en"
+        ? [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+          ]
+        : [
+            "1月",
+            "2月",
+            "3月",
+            "4月",
+            "5月",
+            "6月",
+            "7月",
+            "8月",
+            "9月",
+            "10月",
+            "11月",
+            "12月",
+          ];
+
+    const monthNamesShort =
+      currentLocale === "en"
+        ? [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+          ]
+        : [
+            "1月",
+            "2月",
+            "3月",
+            "4月",
+            "5月",
+            "6月",
+            "7月",
+            "8月",
+            "9月",
+            "10月",
+            "11月",
+            "12月",
+          ];
+
+    const dayNames =
+      currentLocale === "en"
+        ? [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+          ]
+        : [
+            "日曜日",
+            "月曜日",
+            "火曜日",
+            "水曜日",
+            "木曜日",
+            "金曜日",
+            "土曜日",
+          ];
+
+    const dayNamesShort =
+      currentLocale === "en"
+        ? ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+        : ["日", "月", "火", "水", "木", "金", "土"];
+
+    const translations = {
+      monthNames,
+      monthNamesShort,
+      dayNames,
+      dayNamesShort,
+      today: currentLocale === "en" ? "Today" : "今日",
+    };
+
+    LocaleConfig.locales[currentLocale] = translations;
+    LocaleConfig.defaultLocale = currentLocale;
+  };
 
   // 完了した日付をマーク用のオブジェクトに変換
   const markedDates = completedDates.reduce(
@@ -79,13 +142,44 @@ export default function CalendarView() {
   }
 
   const handleDayPress = (day: any) => {
-    console.log(`選択された日付: ${day.year}年${day.month}月${day.day}日`);
+    const selectedDateText = t("calendar.selectedDate");
+    const yearText = locale === "en" ? `${day.year}` : `${day.year}年`;
+    const monthText = locale === "en" ? `${day.month}` : `${day.month}月`;
+    const dayText = locale === "en" ? `${day.day}` : `${day.day}日`;
+    console.log(`${selectedDateText}: ${yearText}${monthText}${dayText}`);
     setSelectedDate(day.dateString);
+  };
+
+  // 年月表示を取得する関数
+  const getHeaderText = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+
+    if (locale === "en") {
+      const monthNames = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+      return `${monthNames[month - 1]} ${year}`;
+    } else {
+      return `${year}年${month}月`;
+    }
   };
 
   return (
     <View className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       <Calendar
+        key={locale} // ロケール変更時にカレンダーを再レンダリング
         current={new Date().toISOString().split("T")[0]}
         markedDates={markedDates}
         onDayPress={handleDayPress}
@@ -108,12 +202,10 @@ export default function CalendarView() {
         firstDay={0}
         hideExtraDays={true}
         renderHeader={(date) => {
-          const year = date.getFullYear();
-          const month = date.getMonth() + 1;
           return (
             <View className="py-4">
               <Text className="text-center text-lg font-bold text-gray-900">
-                {year}年{month}月
+                {getHeaderText(date)}
               </Text>
             </View>
           );
