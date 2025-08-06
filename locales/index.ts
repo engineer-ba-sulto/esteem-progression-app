@@ -123,6 +123,45 @@ const ja = {
     completed: "完了",
     pending: "未完了",
   },
+  subscription: {
+    title: "サブスクリプション",
+    premiumFeatures: "🚀 プレミアム機能",
+    premiumDescription: "より快適で充実した体験をお届けします",
+    selectPlan: "プランを選択",
+    purchase: "購入する",
+    cancel: "解約する",
+    termsAndPrivacy:
+      "購入することで、利用規約とプライバシーポリシーに同意したことになります。サブスクリプションはいつでもキャンセルできます。",
+    popular: "おすすめ",
+    benefits: {
+      noAds: {
+        title: "広告なしで利用",
+        description: "すべての広告が削除されます",
+      },
+      reminders: {
+        title: "リマインダー機能",
+        description: "カスタマイズ可能な通知でタスク管理をサポート",
+      },
+      backup: {
+        title: "無制限バックアップ",
+        description: "データの安全なバックアップ",
+      },
+    },
+    plans: {
+      monthly: {
+        title: "月額プラン",
+        description: "月額でプレミアム機能を利用",
+        price: "¥300",
+        period: "/月",
+      },
+      yearly: {
+        title: "年額プラン",
+        description: "¥600お得！月額¥250相当",
+        price: "¥3,000",
+        period: "/年",
+      },
+    },
+  },
 };
 
 // 英語の翻訳
@@ -246,6 +285,45 @@ const en = {
     deleteTask: "Delete Task",
     completed: "Completed",
     pending: "Pending",
+  },
+  subscription: {
+    title: "Subscription",
+    premiumFeatures: "🚀 Premium Features",
+    premiumDescription: "Enjoy a more comfortable and fulfilling experience",
+    selectPlan: "Select Plan",
+    purchase: "Purchase",
+    cancel: "Cancel",
+    termsAndPrivacy:
+      "By purchasing, you agree to the Terms of Service and Privacy Policy. You can cancel your subscription at any time.",
+    popular: "Popular",
+    benefits: {
+      noAds: {
+        title: "Ad-Free Experience",
+        description: "All ads will be removed",
+      },
+      reminders: {
+        title: "Reminder Feature",
+        description: "Customizable notifications to support task management",
+      },
+      backup: {
+        title: "Unlimited Backup",
+        description: "Safe data backup",
+      },
+    },
+    plans: {
+      monthly: {
+        title: "Monthly Plan",
+        description: "Use premium features monthly",
+        price: "$2.99",
+        period: "/month",
+      },
+      yearly: {
+        title: "Yearly Plan",
+        description: "Save $6! Equivalent to $2.50/month",
+        price: "$29.99",
+        period: "/year",
+      },
+    },
   },
 };
 
