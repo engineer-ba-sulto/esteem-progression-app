@@ -94,7 +94,7 @@ export default function SettingsScreen() {
           <SettingCard
             icon={<BellIcon />}
             label={t("settings.notifications")}
-            onPress={() => router.push("/settings/reminder")}
+            onPress={() => router.push("/settings/notifications")}
           />
           <Text className="px-4 mt-6 text-sm font-semibold text-gray-500 mb-2">
             {t("settings.dataManagement")}

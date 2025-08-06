@@ -1,3 +1,4 @@
+import { useLocalization } from "@/utils/localization-context";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { router } from "expo-router";
@@ -12,7 +13,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function ReminderScreen() {
+export default function NotificationsScreen() {
+  const { t } = useLocalization();
   const [isNotificationEnabled, setIsNotificationEnabled] = useState(false);
   const [notificationTime, setNotificationTime] = useState("20:00");
   const [notificationMessage, setNotificationMessage] =
@@ -22,7 +24,7 @@ export default function ReminderScreen() {
 
   const handleSave = () => {
     // ここで設定を保存する処理を実装
-    console.log("リマインダー設定を保存しました", {
+    console.log(t("notifications.settingsSaved"), {
       isNotificationEnabled,
       notificationTime,
       notificationMessage,
@@ -58,7 +60,7 @@ export default function ReminderScreen() {
           <Ionicons name="chevron-back" size={24} color="#374151" />
         </TouchableOpacity>
         <Text className="flex-1 text-xl font-bold text-gray-800 text-center mr-10">
-          リマインダー設定
+          {t("notifications.title")}
         </Text>
       </View>
 
@@ -70,10 +72,10 @@ export default function ReminderScreen() {
             <View className="flex flex-row items-center justify-between">
               <View className="flex-1">
                 <Text className="text-lg font-medium text-gray-800 mb-1">
-                  通知を有効にする
+                  {t("notifications.enableNotifications")}
                 </Text>
                 <Text className="text-sm text-gray-500">
-                  毎日のタスク確認をリマインダーで通知します
+                  {t("notifications.enableNotificationsDescription")}
                 </Text>
               </View>
               <Switch
@@ -88,7 +90,7 @@ export default function ReminderScreen() {
           {/* 通知時刻 */}
           <View className="bg-white rounded-lg border border-gray-200 p-4">
             <Text className="text-lg font-medium text-gray-800 mb-3">
-              通知時刻
+              {t("notifications.notificationTime")}
             </Text>
             <TouchableOpacity
               className="border border-gray-300 rounded-lg p-3"
@@ -99,14 +101,14 @@ export default function ReminderScreen() {
               </Text>
             </TouchableOpacity>
             <Text className="text-sm text-gray-500 mt-2">
-              毎日この時刻に通知が送信されます
+              {t("notifications.notificationTimeDescription")}
             </Text>
           </View>
 
           {/* 通知メッセージ */}
           <View className="bg-white rounded-lg border border-gray-200 p-4">
             <Text className="text-lg font-medium text-gray-800 mb-3">
-              通知メッセージ
+              {t("notifications.notificationMessage")}
             </Text>
             <TextInput
               value={notificationMessage}
@@ -114,11 +116,11 @@ export default function ReminderScreen() {
               className="border border-gray-300 rounded-lg p-3 text-gray-800"
               multiline
               numberOfLines={3}
-              placeholder="通知メッセージを入力してください"
+              placeholder={t("notifications.notificationMessagePlaceholder")}
               placeholderTextColor="#9ca3af"
             />
             <Text className="text-sm text-gray-500 mt-2">
-              通知に表示されるメッセージをカスタマイズできます
+              {t("notifications.notificationMessageDescription")}
             </Text>
           </View>
         </View>
@@ -130,7 +132,7 @@ export default function ReminderScreen() {
             className="bg-blue-500 rounded-lg py-4 px-6"
           >
             <Text className="text-white text-center font-semibold text-lg">
-              保存
+              {t("notifications.save")}
             </Text>
           </TouchableOpacity>
         </View>
@@ -150,7 +152,7 @@ export default function ReminderScreen() {
             onPress={() => {}} // モーダル内のタップを無効化
           >
             <Text className="text-lg font-semibold text-gray-800 mb-4 text-center">
-              通知時刻を選択
+              {t("notifications.selectTime")}
             </Text>
             <DateTimePicker
               value={selectedTime}
@@ -164,7 +166,9 @@ export default function ReminderScreen() {
               onPress={() => setShowTimePicker(false)}
               className="mt-4 bg-blue-500 rounded-lg py-3 px-6"
             >
-              <Text className="text-white text-center font-semibold">確定</Text>
+              <Text className="text-white text-center font-semibold">
+                {t("notifications.confirm")}
+              </Text>
             </TouchableOpacity>
           </TouchableOpacity>
         </TouchableOpacity>

@@ -162,6 +162,22 @@ const ja = {
       },
     },
   },
+  notifications: {
+    title: "通知",
+    enableNotifications: "通知を有効にする",
+    enableNotificationsDescription:
+      "毎日のタスク確認をリマインダーで通知します",
+    notificationTime: "通知時刻",
+    notificationTimeDescription: "毎日この時刻に通知が送信されます",
+    notificationMessage: "通知メッセージ",
+    notificationMessageDescription:
+      "通知に表示されるメッセージをカスタマイズできます",
+    notificationMessagePlaceholder: "通知メッセージを入力してください",
+    selectTime: "通知時刻を選択",
+    confirm: "確定",
+    save: "保存",
+    settingsSaved: "通知設定を保存しました",
+  },
 };
 
 // 英語の翻訳
@@ -324,6 +340,22 @@ const en = {
         period: "/year",
       },
     },
+  },
+  notifications: {
+    title: "Notifications",
+    enableNotifications: "Enable Notifications",
+    enableNotificationsDescription: "Receive daily task reminders",
+    notificationTime: "Notification Time",
+    notificationTimeDescription:
+      "Notifications will be sent at this time every day",
+    notificationMessage: "Notification Message",
+    notificationMessageDescription:
+      "You can customize the message displayed in notifications",
+    notificationMessagePlaceholder: "Enter notification message",
+    selectTime: "Select Time",
+    confirm: "Confirm",
+    save: "Save",
+    settingsSaved: "Notification settings saved",
   },
 };
 
