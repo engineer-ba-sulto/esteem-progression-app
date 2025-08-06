@@ -22,3 +22,4 @@ export const EyeIcon = () => <Text className="text-xl">👁️</Text>;
 export const TrashIcon = () => <Text className="text-xl">🗑️</Text>;
 export const ChartBarIcon = () => <Text className="text-xl">📊</Text>;
 export const MegaphoneIcon = () => <Text className="text-xl">📢</Text>;
+export const LanguageIcon = () => <Text className="text-xl">🌐</Text>;

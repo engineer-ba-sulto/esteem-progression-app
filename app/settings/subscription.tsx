@@ -1,6 +1,7 @@
-import { benefits } from "@/constants/benefits";
-import { plans } from "@/constants/plan";
+import { useBenefits } from "@/constants/benefits";
+import { usePlans } from "@/constants/plan";
 import { PlanType } from "@/types/plan";
+import { useLocalization } from "@/utils/localization-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -9,6 +10,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SubscriptionScreen() {
   const [selectedPlan, setSelectedPlan] = useState<PlanType>("yearly");
+  const { t } = useLocalization();
+  const benefits = useBenefits();
+  const plans = usePlans();
 
   const handleBack = () => {
     router.back();
@@ -35,7 +39,7 @@ export default function SubscriptionScreen() {
           <Ionicons name="chevron-back" size={24} color="#374151" />
         </TouchableOpacity>
         <Text className="flex-1 text-xl font-bold text-gray-800 text-center mr-10">
-          サブスクリプション
+          {t("subscription.title")}
         </Text>
       </View>
 
@@ -44,10 +48,10 @@ export default function SubscriptionScreen() {
         {/* Premium Features Section */}
         <View className="mt-6">
           <Text className="text-2xl font-bold text-gray-800 mb-2 text-center">
-            🚀 プレミアム機能
+            {t("subscription.premiumFeatures")}
           </Text>
           <Text className="text-gray-600 text-center mb-6">
-            より快適で充実した体験をお届けします
+            {t("subscription.premiumDescription")}
           </Text>
 
           {/* Benefits List */}
@@ -75,7 +79,7 @@ export default function SubscriptionScreen() {
           {/* Plan Selection */}
           <View className="mb-8">
             <Text className="text-lg font-semibold text-gray-800 mb-4">
-              プランを選択
+              {t("subscription.selectPlan")}
             </Text>
             <View className="gap-y-3">
               {plans.map((plan) => (
@@ -91,7 +95,7 @@ export default function SubscriptionScreen() {
                   {plan.popular && (
                     <View className="absolute -top-2 left-4 bg-blue-500 px-3 py-1 rounded-full">
                       <Text className="text-white text-xs font-semibold">
-                        おすすめ
+                        {t("subscription.popular")}
                       </Text>
                     </View>
                   )}
@@ -136,7 +140,7 @@ export default function SubscriptionScreen() {
               className="bg-blue-500 rounded-lg py-4 px-6"
             >
               <Text className="text-white text-center font-semibold text-lg">
-                購入する
+                {t("subscription.purchase")}
               </Text>
             </TouchableOpacity>
 
@@ -145,7 +149,7 @@ export default function SubscriptionScreen() {
               className="bg-white border border-gray-300 rounded-lg py-4 px-6"
             >
               <Text className="text-gray-700 text-center font-semibold text-lg">
-                解約する
+                {t("subscription.cancel")}
               </Text>
             </TouchableOpacity>
           </View>
@@ -153,8 +157,7 @@ export default function SubscriptionScreen() {
           {/* Terms and Privacy */}
           <View className="mb-6">
             <Text className="text-xs text-gray-500 text-center leading-4">
-              購入することで、利用規約とプライバシーポリシーに同意したことになります。
-              サブスクリプションはいつでもキャンセルできます。
+              {t("subscription.termsAndPrivacy")}
             </Text>
           </View>
         </View>

@@ -1,20 +1,25 @@
 import { PlanType } from "@/types/plan";
+import { useLocalization } from "@/utils/localization-context";
 
-export const plans = [
-  {
-    id: "monthly" as PlanType,
-    title: "月額プラン",
-    price: "¥300",
-    period: "/月",
-    description: "月額でプレミアム機能を利用",
-    popular: false,
-  },
-  {
-    id: "yearly" as PlanType,
-    title: "年額プラン",
-    price: "¥3,000",
-    period: "/年",
-    description: "¥600お得！月額¥250相当",
-    popular: true,
-  },
-];
+export const usePlans = () => {
+  const { t } = useLocalization();
+
+  return [
+    {
+      id: "monthly" as PlanType,
+      title: t("subscription.plans.monthly.title"),
+      price: t("subscription.plans.monthly.price"),
+      period: t("subscription.plans.monthly.period"),
+      description: t("subscription.plans.monthly.description"),
+      popular: false,
+    },
+    {
+      id: "yearly" as PlanType,
+      title: t("subscription.plans.yearly.title"),
+      price: t("subscription.plans.yearly.price"),
+      period: t("subscription.plans.yearly.period"),
+      description: t("subscription.plans.yearly.description"),
+      popular: true,
+    },
+  ];
+};
