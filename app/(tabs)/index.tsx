@@ -56,7 +56,7 @@ export default function HomeScreen() {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     // ダミーデータの日付を現在の日付に合わせて調整
-    const adjustedDate = new Date("2024-08-07"); // ダミーデータの基準日
+    const adjustedDate = new Date(); // ダミーデータの基準日
     adjustedDate.setDate(adjustedDate.getDate() + diffDays);
     const targetDateStr = adjustedDate.toISOString().split("T")[0];
 
