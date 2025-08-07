@@ -72,7 +72,7 @@ const ja = {
     setTaskButton: "{{day}}のタスクを設定",
     congratulations: "達成おめでとうございます！",
     greatDay: "素晴らしい一日でしたね。",
-    resetDemo: "デモをリセット",
+    resetDemo: "完了をリセット",
   },
   profile: {
     name: "田中 太郎",
@@ -281,7 +281,7 @@ const en = {
     setTaskButton: "Set {{day}} Task",
     congratulations: "Congratulations on your achievement!",
     greatDay: "What a great day it was.",
-    resetDemo: "Reset Demo",
+    resetDemo: "Reset Completed",
   },
   profile: {
     name: "Taro Tanaka",
