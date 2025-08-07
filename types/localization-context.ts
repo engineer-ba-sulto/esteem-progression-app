@@ -4,4 +4,5 @@ export interface LocalizationContextType {
   t: (key: string, params?: any) => string;
   getCurrentLocale: () => string;
   getAvailableLocales: () => string[];
+  updateCalendarLocale: (currentLocale: string) => void;
 }
