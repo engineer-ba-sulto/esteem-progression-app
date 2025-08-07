@@ -2,48 +2,120 @@ import AdBanner from "@/components/adbanner";
 import ArrowButton from "@/components/arrow-button";
 import { useDayLabels } from "@/constants/day-labels";
 import { mockTasks } from "@/constants/mock-tasks";
-import { Day } from "@/types/day";
-import { getFormattedDate } from "@/utils/date";
+import { getFormattedDateFromString } from "@/utils/date";
 import { useLocalization } from "@/utils/localization-context";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   const [tasks, setTasks] = useState(mockTasks);
-  const [currentDay, setCurrentDay] = useState<Day>("today");
+  const [currentDate, setCurrentDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split("T")[0]; // YYYY-MM-DD形式
+  });
   const { t } = useLocalization();
 
   // ローカライゼーションされたday-labelsを取得
   const dayLabels = useDayLabels();
 
-  const task = tasks[currentDay];
+  // 今日の日付を取得
+  const today = new Date();
+  const todayStr = today.toISOString().split("T")[0];
+
+  // 昨日、今日、明日の日付を取得
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().split("T")[0];
+
+  // 有効な日付範囲かどうかをチェック
+  const isValidDate = (date: string) => {
+    return date === yesterdayStr || date === todayStr || date === tomorrowStr;
+  };
+
+  // 現在の日付が有効範囲外の場合は今日にリセット
+  useEffect(() => {
+    if (!isValidDate(currentDate)) {
+      setCurrentDate(todayStr);
+    }
+  }, [currentDate, todayStr]);
+
+  // 現在の日付に対応するタスクを取得
+  const getTaskForDate = (date: string) => {
+    // 現在の日付に基づいてタスクの日付を動的に計算
+    const currentDateObj = new Date(date);
+    const todayObj = new Date(todayStr);
+
+    // 日付の差分を計算
+    const diffTime = currentDateObj.getTime() - todayObj.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    // ダミーデータの日付を現在の日付に合わせて調整
+    const adjustedDate = new Date("2024-08-07"); // ダミーデータの基準日
+    adjustedDate.setDate(adjustedDate.getDate() + diffDays);
+    const targetDateStr = adjustedDate.toISOString().split("T")[0];
+
+    return tasks.find((task) => task.date === targetDateStr);
+  };
+
+  const task = getTaskForDate(currentDate);
+
+  // 現在の日付が今日、明日、昨日のどれかを判断
+  const getDayLabel = (date: string) => {
+    if (date === todayStr) return dayLabels.today;
+    if (date === tomorrowStr) return dayLabels.tomorrow;
+    if (date === yesterdayStr) return dayLabels.yesterday;
+    return getFormattedDateFromString(date);
+  };
 
   const handleComplete = () => {
     if (task) {
-      const updatedTasks = {
-        ...tasks,
-        [currentDay]: { ...task, completed: true },
-      };
+      const updatedTasks = tasks.map((t) =>
+        t.id === task.id ? { ...t, isCompleted: true } : t
+      );
       setTasks(updatedTasks);
     }
   };
 
   const handleReset = () => {
     setTasks(mockTasks);
-    setCurrentDay("today");
+    const today = new Date();
+    setCurrentDate(today.toISOString().split("T")[0]);
   };
 
   const handlePrevDay = () => {
-    if (currentDay === "tomorrow") setCurrentDay("today");
-    else if (currentDay === "today") setCurrentDay("yesterday");
+    const current = new Date(currentDate);
+    current.setDate(current.getDate() - 1);
+    const newDate = current.toISOString().split("T")[0];
+
+    // 昨日より前には行けない
+    if (newDate >= yesterdayStr) {
+      setCurrentDate(newDate);
+    }
   };
 
   const handleNextDay = () => {
-    if (currentDay === "yesterday") setCurrentDay("today");
-    else if (currentDay === "today") setCurrentDay("tomorrow");
+    const current = new Date(currentDate);
+    current.setDate(current.getDate() + 1);
+    const newDate = current.toISOString().split("T")[0];
+
+    // 明日より後には行けない
+    if (newDate <= tomorrowStr) {
+      setCurrentDate(newDate);
+    }
   };
+
+  // 前日・翌日ボタンの無効化条件
+  const canGoPrev = currentDate > yesterdayStr;
+  const canGoNext = currentDate < tomorrowStr;
+
+  // 今日以外の日付の場合は空の状態を表示
+  const isToday = currentDate === todayStr;
 
   return (
     <SafeAreaView className="flex-1 bg-blue-50" edges={["top"]}>
@@ -52,21 +124,21 @@ export default function HomeScreen() {
         <View className="flex-row items-center justify-between">
           <ArrowButton
             onPress={handlePrevDay}
-            disabled={currentDay === "yesterday"}
+            disabled={!canGoPrev}
             iconName="chevron-back"
           />
           <View className="text-center">
             <Text className="text-2xl font-bold text-center">
-              {dayLabels[currentDay]}
+              {getDayLabel(currentDate)}
               {t("tasks.title")}
             </Text>
             <Text className="text-gray-500 text-sm text-center">
-              {getFormattedDate(currentDay)}
+              {getFormattedDateFromString(currentDate)}
             </Text>
           </View>
           <ArrowButton
             onPress={handleNextDay}
-            disabled={currentDay === "tomorrow"}
+            disabled={!canGoNext}
             iconName="chevron-forward"
           />
         </View>
@@ -74,15 +146,15 @@ export default function HomeScreen() {
 
       {/* Main Content */}
       <View className="flex-1 flex flex-col items-center justify-center px-6">
-        {task && !task.completed ? (
+        {task && !task.isCompleted ? (
           <View className="w-full text-center flex flex-col items-center">
             <View className="w-full p-6 bg-white rounded-2xl border border-gray-200 shadow-md">
               <Text className="text-2xl font-bold text-center">
-                {task.text}
+                {task.content}
               </Text>
-              {task.description && (
+              {task.summary && (
                 <Text className="text-gray-600 mt-2 text-center">
-                  {task.description}
+                  {task.summary}
                 </Text>
               )}
             </View>
@@ -95,7 +167,7 @@ export default function HomeScreen() {
               </Text>
             </TouchableOpacity>
           </View>
-        ) : task && task.completed ? (
+        ) : task && task.isCompleted ? (
           <View className="text-center">
             <Text className="text-7xl text-center mb-6">🎉</Text>
             <Text className="text-3xl font-bold text-gray-900 text-center">
@@ -111,7 +183,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
         ) : (
-          <EmptyStateScreenInternal day={currentDay} dayLabels={dayLabels} />
+          <EmptyStateScreenInternal date={currentDate} dayLabels={dayLabels} />
         )}
       </View>
       <AdBanner />
@@ -120,10 +192,28 @@ export default function HomeScreen() {
 }
 
 const EmptyStateScreenInternal: React.FC<{
-  day: Day;
-  dayLabels: Record<Day, string>;
-}> = ({ day, dayLabels }) => {
+  date: string;
+  dayLabels: Record<string, string>;
+}> = ({ date, dayLabels }) => {
   const { t } = useLocalization();
+
+  // 現在の日付が今日、明日、昨日のどれかを判断
+  const getDayLabel = (date: string) => {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+
+    const todayStr = today.toISOString().split("T")[0];
+    const tomorrowStr = tomorrow.toISOString().split("T")[0];
+    const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+    if (date === todayStr) return dayLabels.today;
+    if (date === tomorrowStr) return dayLabels.tomorrow;
+    if (date === yesterdayStr) return dayLabels.yesterday;
+    return getFormattedDateFromString(date);
+  };
 
   return (
     <View className="flex flex-col items-center justify-center text-center p-8">
@@ -134,13 +224,13 @@ const EmptyStateScreenInternal: React.FC<{
         {t("home.readyMessage")}
       </Text>
       <Text className="text-gray-600 mt-2 max-w-xs text-center">
-        {t("home.motivationMessage", { day: dayLabels[day] })}
+        {t("home.motivationMessage", { day: getDayLabel(date) })}
       </Text>
 
       <TouchableOpacity className="mt-8 flex-row items-center justify-center h-12 w-auto px-8 bg-blue-600 rounded-xl shadow-lg">
         <Ionicons name="add" size={24} color="white" />
         <Text className="font-semibold text-white ml-2">
-          {t("home.setTaskButton", { day: dayLabels[day] })}
+          {t("home.setTaskButton", { day: getDayLabel(date) })}
         </Text>
       </TouchableOpacity>
     </View>
