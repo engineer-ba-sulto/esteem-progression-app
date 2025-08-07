@@ -10,6 +10,7 @@ import {
   TrashIcon,
 } from "@/components/icons";
 import SettingCard from "@/components/setting-card";
+import TabHeader from "@/components/screen-header";
 import { useLocalization } from "@/utils/localization-context";
 import { router } from "expo-router";
 import React from "react";
@@ -69,11 +70,7 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView className="flex flex-col h-full bg-blue-50" edges={["top"]}>
       {/* Header */}
-      <View className="p-4 flex-shrink-0 bg-white rounded-3xl shadow-sm h-24 flex items-center justify-center">
-        <Text className="text-2xl font-bold text-gray-800 text-center">
-          {t("settings.title")}
-        </Text>
-      </View>
+      <TabHeader title={t("settings.title")} />
 
       {/* Main Content */}
       <ScrollView className="flex-1 p-4">

@@ -1,3 +1,4 @@
+import TabHeader from "@/components/screen-header";
 import { useLocalization } from "@/utils/localization-context";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -52,17 +53,17 @@ export default function NotificationsScreen() {
   return (
     <SafeAreaView className="flex flex-col h-full bg-blue-50" edges={["top"]}>
       {/* Header */}
-      <View className="p-4 flex-shrink-0 bg-white rounded-3xl shadow-sm h-24 flex flex-row items-center">
-        <TouchableOpacity
-          onPress={handleBack}
-          className="w-10 h-10 flex items-center justify-center"
-        >
-          <Ionicons name="chevron-back" size={24} color="#374151" />
-        </TouchableOpacity>
-        <Text className="flex-1 text-xl font-bold text-gray-800 text-center mr-10">
-          {t("notifications.title")}
-        </Text>
-      </View>
+      <TabHeader
+        title={t("notifications.title")}
+        leftComponent={
+          <TouchableOpacity
+            onPress={handleBack}
+            className="w-10 h-10 flex items-center justify-center"
+          >
+            <Ionicons name="chevron-back" size={24} color="#374151" />
+          </TouchableOpacity>
+        }
+      />
 
       {/* Main Content */}
       <ScrollView className="flex-1 p-4">

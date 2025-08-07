@@ -1,13 +1,14 @@
+import AchievementCard from "@/components/achievement-card";
 import AdBanner from "@/components/adbanner";
 import CalendarView from "@/components/calendar-view";
 import { UserCircleIcon } from "@/components/icons";
+import TabHeader from "@/components/screen-header";
 import StatCard from "@/components/stat-card";
 import { useRecords } from "@/constants/record";
 import { useLocalization } from "@/utils/localization-context";
 import React from "react";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AchievementCard from "../../components/achievement-card";
 
 export default function RecordScreen() {
   const { t } = useLocalization();
@@ -16,9 +17,7 @@ export default function RecordScreen() {
   return (
     <SafeAreaView className="flex flex-col h-full bg-blue-50" edges={["top"]}>
       {/* Header */}
-      <View className="p-4 flex flex-row items-center justify-center flex-shrink-0 bg-white rounded-3xl shadow-sm h-24">
-        <Text className="text-2xl font-bold">{t("records.title")}</Text>
-      </View>
+      <TabHeader title={t("records.title")} />
 
       {/* Main Content */}
       <ScrollView className="flex-1 p-4">
