@@ -1,4 +1,4 @@
-export type Achievement = {
+export type Record = {
   id: string;
   icon: string;
   title: string;
