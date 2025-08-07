@@ -1,5 +1,6 @@
 import AdBanner from "@/components/adbanner";
 import ArrowButton from "@/components/arrow-button";
+import TabHeader from "@/components/screen-header";
 import { useDayLabels } from "@/constants/day-labels";
 import { mockTasks } from "@/constants/mock-tasks";
 import { getFormattedDateFromString } from "@/utils/date";
@@ -120,29 +121,25 @@ export default function HomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-blue-50" edges={["top"]}>
       {/* Header with Date Navigation */}
-      <View className="flex-shrink-0 text-center mb-8 px-4 pt-6 bg-white pb-4 rounded-3xl shadow-sm h-24">
-        <View className="flex-row items-center justify-between">
+      <TabHeader
+        title={`${getDayLabel(currentDate)}${t("tasks.title")}`}
+        subtitle={getFormattedDateFromString(currentDate)}
+        leftComponent={
           <ArrowButton
             onPress={handlePrevDay}
             disabled={!canGoPrev}
             iconName="chevron-back"
           />
-          <View className="text-center">
-            <Text className="text-2xl font-bold text-center">
-              {getDayLabel(currentDate)}
-              {t("tasks.title")}
-            </Text>
-            <Text className="text-gray-500 text-sm text-center">
-              {getFormattedDateFromString(currentDate)}
-            </Text>
-          </View>
+        }
+        rightComponent={
           <ArrowButton
             onPress={handleNextDay}
             disabled={!canGoNext}
             iconName="chevron-forward"
           />
-        </View>
-      </View>
+        }
+        className="mb-8"
+      />
 
       {/* Main Content */}
       <View className="flex-1 flex flex-col items-center justify-center px-6">
