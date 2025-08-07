@@ -78,17 +78,17 @@ const ja = {
     name: "田中 太郎",
     email: "taro.tanaka@example.com",
   },
-  achievements: {
-    title: "実績",
+  records: {
+    title: "記録",
     description: "あなたの進歩を記録",
     unlocked: "解除済み",
     locked: "ロック中",
     currentStreak: "現在の継続日数",
     bestStreak: "最高継続記録",
-    totalAchievements: "合計達成数",
+    totalRecords: "合計達成数",
     monthlyCalendar: "月間カレンダー",
     streakDays: "日",
-    achievementsCount: "個",
+    recordsCount: "個",
     firstStep: "はじめの一歩：最初のタスクを完了",
     fiveDayStreak: "5日連続達成",
     perfectMonth: "パーフェクトマンス：1ヶ月継続",
@@ -205,7 +205,8 @@ const ja = {
     termsOfService: "利用規約",
     businessRegistration: "特定商取引法などに基づく表示",
     privacyProtection: "プライバシーの保護",
-    privacyDescription: "私たちはあなたのプライバシーを大切にしています。収集されたデータは暗号化され、安全に保管されます。詳細についてはプライバシーポリシーをご確認ください。",
+    privacyDescription:
+      "私たちはあなたのプライバシーを大切にしています。収集されたデータは暗号化され、安全に保管されます。詳細についてはプライバシーポリシーをご確認ください。",
   },
 };
 
@@ -286,17 +287,17 @@ const en = {
     name: "Taro Tanaka",
     email: "taro.tanaka@example.com",
   },
-  achievements: {
-    title: "Achievements",
+  records: {
+    title: "Records",
     description: "Track your progress",
     unlocked: "Unlocked",
     locked: "Locked",
     currentStreak: "Current Streak",
     bestStreak: "Best Streak",
-    totalAchievements: "Total",
+    totalRecords: "Total",
     monthlyCalendar: "Monthly Calendar",
     streakDays: "days",
-    achievementsCount: "",
+    recordsCount: "",
     firstStep: "First Step: Complete your first task",
     fiveDayStreak: "5-Day Streak",
     perfectMonth: "Perfect Month: 1 month continuous",
@@ -413,7 +414,8 @@ const en = {
     termsOfService: "Terms of Service",
     businessRegistration: "Business Registration Information",
     privacyProtection: "Privacy Protection",
-    privacyDescription: "We value your privacy. Collected data is encrypted and stored securely. Please check the privacy policy for details.",
+    privacyDescription:
+      "We value your privacy. Collected data is encrypted and stored securely. Please check the privacy policy for details.",
   },
 };
 

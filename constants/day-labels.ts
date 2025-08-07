@@ -11,10 +11,3 @@ export const useDayLabels = () => {
     tomorrow: t("days.tomorrow"),
   } as Record<Day, string>;
 };
-
-// 後方互換性のためのデフォルト値
-export const dayLabels: Record<Day, string> = {
-  yesterday: "昨日",
-  today: "今日",
-  tomorrow: "明日",
-};
