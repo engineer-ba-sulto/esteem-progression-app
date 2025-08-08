@@ -1,5 +1,6 @@
 import addDummyData from "@/db/addDummyData";
 import i18n from "@/locales";
+import { LocalizationProvider } from "@/utils/localization-context";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import * as Localization from "expo-localization";
@@ -7,10 +8,9 @@ import { Stack } from "expo-router";
 import { openDatabaseSync, SQLiteProvider } from "expo-sqlite";
 import { Suspense, useEffect } from "react";
 import { ActivityIndicator } from "react-native";
+import { LocaleConfig } from "react-native-calendars";
 import migrations from "../drizzle/migrations";
 import "../global.css";
-import { LocalizationProvider } from "@/utils/localization-context";
-import { LocaleConfig } from "react-native-calendars";
 
 export const DATABASE_NAME = "test.db";
 

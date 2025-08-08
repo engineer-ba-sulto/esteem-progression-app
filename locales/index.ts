@@ -122,6 +122,15 @@ const ja = {
     deleteTask: "タスクを削除",
     completed: "完了",
     pending: "未完了",
+    contentLabel: "タスク内容",
+    contentPlaceholder: "例：朝のランニング",
+    summaryLabel: "メモ（任意）",
+    summaryPlaceholder: "補足や目標など",
+    errors: {
+      required: "必須です",
+      maxContent: "{{count}}文字以内で入力してください",
+      maxSummary: "{{count}}文字以内で入力してください",
+    },
   },
   subscription: {
     title: "サブスクリプション",
@@ -331,6 +340,15 @@ const en = {
     deleteTask: "Delete Task",
     completed: "Completed",
     pending: "Pending",
+    contentLabel: "Task Content",
+    contentPlaceholder: "e.g. Morning run",
+    summaryLabel: "Memo (optional)",
+    summaryPlaceholder: "Additional notes or goals",
+    errors: {
+      required: "This field is required",
+      maxContent: "Please enter within {{count}} characters",
+      maxSummary: "Please enter within {{count}} characters",
+    },
   },
   subscription: {
     title: "Subscription",
