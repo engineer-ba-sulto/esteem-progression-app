@@ -30,12 +30,13 @@ export default function TaskFormDialog({
   const TaskSchema = z.object({
     content: z
       .string()
+      .trim()
       .min(1, { message: t("tasks.errors.required") })
       .max(100, { message: t("tasks.errors.maxContent", { count: 100 }) }),
     summary: z
       .string()
-      .max(200, { message: t("tasks.errors.maxSummary", { count: 200 }) })
-      .optional(),
+      .trim()
+      .max(200, { message: t("tasks.errors.maxSummary", { count: 200 }) }),
   });
 
   type TaskFormValues = z.infer<typeof TaskSchema>;
@@ -45,11 +46,11 @@ export default function TaskFormDialog({
     handleSubmit,
     reset,
     clearErrors,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isValid },
   } = useForm<TaskFormValues>({
     resolver: zodResolver(TaskSchema),
     defaultValues: { content: "", summary: "" },
-    mode: "onSubmit",
+    mode: "onChange",
   });
 
   // ダイアログが閉じられた時にフォームをリセット
@@ -114,18 +115,30 @@ export default function TaskFormDialog({
                 control={control}
                 name="content"
                 render={({ field: { onChange, onBlur, value } }) => (
-                  <TextInput
-                    className="bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900"
-                    placeholder={t("tasks.contentPlaceholder")}
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                    maxLength={100}
-                  />
+                  <View>
+                    <TextInput
+                      className={`bg-white border rounded-xl px-4 py-3 text-gray-900 ${
+                        errors.content ? "border-red-400" : "border-gray-200"
+                      }`}
+                      placeholder={t("tasks.contentPlaceholder")}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      maxLength={100}
+                      autoFocus
+                      returnKeyType="done"
+                      onSubmitEditing={handleSubmit(onSubmit)}
+                    />
+                    <View className="flex-row justify-end">
+                      <Text className="text-xs text-gray-400 mt-1">
+                        {(value?.length ?? 0)}/100
+                      </Text>
+                    </View>
+                  </View>
                 )}
               />
               {errors.content && (
-                <Text className="text-red-500 mt-1">
+                <Text className="text-red-500 text-xs mt-1">
                   {errors.content.message}
                 </Text>
               )}
@@ -140,17 +153,26 @@ export default function TaskFormDialog({
                 control={control}
                 name="summary"
                 render={({ field: { onChange, onBlur, value } }) => (
-                  <TextInput
-                    className="bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 h-32"
-                    placeholder={t("tasks.summaryPlaceholder")}
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                    maxLength={200}
-                    multiline
-                    numberOfLines={5}
-                    textAlignVertical="top"
-                  />
+                  <View>
+                    <TextInput
+                      className={`bg-white border rounded-xl px-4 py-3 text-gray-900 h-32 ${
+                        errors.summary ? "border-red-400" : "border-gray-200"
+                      }`}
+                      placeholder={t("tasks.summaryPlaceholder")}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      maxLength={200}
+                      multiline
+                      numberOfLines={5}
+                      textAlignVertical="top"
+                    />
+                    <View className="flex-row justify-end">
+                      <Text className="text-xs text-gray-400 mt-1">
+                        {(value?.length ?? 0)}/200
+                      </Text>
+                    </View>
+                  </View>
                 )}
               />
               {errors.summary && (
@@ -172,8 +194,10 @@ export default function TaskFormDialog({
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleSubmit(onSubmit)}
-                disabled={isSubmitting}
-                className="w-20 h-11 px-4 rounded-xl bg-blue-600 items-center justify-center"
+                disabled={isSubmitting || !isValid}
+                className={`w-20 h-11 px-4 rounded-xl items-center justify-center ${
+                  isSubmitting || !isValid ? "bg-blue-300" : "bg-blue-600"
+                }`}
               >
                 {isSubmitting ? (
                   <ActivityIndicator size="small" color="white" />
