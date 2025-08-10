@@ -1,17 +1,19 @@
 import AdBanner from "@/components/adbanner";
 import ArrowButton from "@/components/arrow-button";
 import TabHeader from "@/components/screen-header";
+import TaskFormDialog from "@/components/task-form-dialog";
 import { useDayLabels } from "@/constants/day-labels";
 import { mockTasks } from "@/constants/mock-tasks";
 import { getFormattedDateFromString } from "@/utils/date";
 import { useLocalization } from "@/utils/localization-context";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   const [tasks, setTasks] = useState(mockTasks);
+  const [isTaskDialogVisible, setIsTaskDialogVisible] = useState(false);
   const [currentDate, setCurrentDate] = useState(() => {
     const today = new Date();
     return today.toISOString().split("T")[0]; // YYYY-MM-DD形式
@@ -35,16 +37,19 @@ export default function HomeScreen() {
   const tomorrowStr = tomorrow.toISOString().split("T")[0];
 
   // 有効な日付範囲かどうかをチェック
-  const isValidDate = (date: string) => {
-    return date === yesterdayStr || date === todayStr || date === tomorrowStr;
-  };
+  const isValidDate = useCallback(
+    (date: string) => {
+      return date === yesterdayStr || date === todayStr || date === tomorrowStr;
+    },
+    [yesterdayStr, todayStr, tomorrowStr]
+  );
 
   // 現在の日付が有効範囲外の場合は今日にリセット
   useEffect(() => {
     if (!isValidDate(currentDate)) {
       setCurrentDate(todayStr);
     }
-  }, [currentDate, todayStr]);
+  }, [currentDate, todayStr, isValidDate]);
 
   // 現在の日付に対応するタスクを取得
   const getTaskForDate = (date: string) => {
@@ -115,8 +120,7 @@ export default function HomeScreen() {
   const canGoPrev = currentDate > yesterdayStr;
   const canGoNext = currentDate < tomorrowStr;
 
-  // 今日以外の日付の場合は空の状態を表示
-  const isToday = currentDate === todayStr;
+  // 今日以外の日付の場合は空の状態を表示（未使用のため削除）
 
   return (
     <SafeAreaView className="flex-1 bg-blue-50" edges={["top"]}>
@@ -180,9 +184,18 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
         ) : (
-          <EmptyStateScreenInternal date={currentDate} dayLabels={dayLabels} />
+          <EmptyStateScreenInternal
+            date={currentDate}
+            dayLabels={dayLabels}
+            onOpenDialog={() => setIsTaskDialogVisible(true)}
+          />
         )}
       </View>
+      <TaskFormDialog
+        visible={isTaskDialogVisible}
+        onClose={() => setIsTaskDialogVisible(false)}
+        date={currentDate}
+      />
       <AdBanner />
     </SafeAreaView>
   );
@@ -191,7 +204,8 @@ export default function HomeScreen() {
 const EmptyStateScreenInternal: React.FC<{
   date: string;
   dayLabels: Record<string, string>;
-}> = ({ date, dayLabels }) => {
+  onOpenDialog: () => void;
+}> = ({ date, dayLabels, onOpenDialog }) => {
   const { t } = useLocalization();
 
   // 現在の日付が今日、明日、昨日のどれかを判断
@@ -224,7 +238,11 @@ const EmptyStateScreenInternal: React.FC<{
         {t("home.motivationMessage", { day: getDayLabel(date) })}
       </Text>
 
-      <TouchableOpacity className="mt-8 flex-row items-center justify-center h-12 w-auto px-8 bg-blue-600 rounded-xl shadow-lg">
+      {/* タスク設定ボタン（ダイアログを開く） */}
+      <TouchableOpacity
+        className="mt-8 flex-row items-center justify-center h-12 w-auto px-8 bg-blue-600 rounded-xl shadow-lg"
+        onPress={onOpenDialog}
+      >
         <Ionicons name="add" size={24} color="white" />
         <Text className="font-semibold text-white ml-2">
           {t("home.setTaskButton", { day: getDayLabel(date) })}
