@@ -17,8 +17,9 @@
     - 完了トグルで `UPDATE tasks SET isCompleted=1, updatedAt=now()`
   - 変更: `components/task-form-dialog.tsx`
     - 保存時に `db.insert(schema.tasks)` を実行
-- 【現状維持（延期）】カレンダーのDB化
-  - 変更しない: `components/calendar-view.tsx`（v0.2へ）
+- 【現状維持（延期）】カレンダーのDB化（v0.2で対応／チケット作成済）
+  - 変更しない: `components/calendar-view.tsx`
+  - チケット: `docs/tickets/p0-004-calendar-db.md`（当月のDB取得・マーク生成・useLiveQuery対応）
 - 【現状維持（延期）】統計/実績、通知、バックアップ、言語切替、レコード画面のリネーム
   - 変更しない: `app/(tabs)/recond.tsx` ほか（v0.2以降へ）
 
