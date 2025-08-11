@@ -1,49 +1,97 @@
-import { mockTasks } from "@/constants/mock-tasks";
+import { db } from "@/db/client";
+import { Task, taskTable } from "@/db/schema";
 import { useLocalization } from "@/utils/localization-context";
-import React, { useEffect, useState } from "react";
+import { and, gte, lte } from "drizzle-orm";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import React, { useEffect, useMemo, useState } from "react";
 import { Text, View } from "react-native";
 import { Calendar } from "react-native-calendars";
 
+const toYMD = (d: Date) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
+
 export default function CalendarView() {
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedDate, setSelectedDate] = useState("");
   const { t, locale, updateCalendarLocale } = useLocalization();
 
+  // 今日と当月範囲（ローカルタイムで算出してYYYY-MM-DD化）
+  const { todayYMD, monthStart, monthEnd } = useMemo(() => {
+    const now = new Date();
+    const today = toYMD(now);
+    const start = toYMD(new Date(now.getFullYear(), now.getMonth(), 1));
+    const end = toYMD(new Date(now.getFullYear(), now.getMonth() + 1, 0));
+    return { todayYMD: today, monthStart: start, monthEnd: end };
+  }, []);
+
+  // 当月のタスクのみをLive購読
+  const { data: liveTasks } = useLiveQuery(
+    db
+      .select()
+      .from(taskTable)
+      .where(
+        and(gte(taskTable.date, monthStart), lte(taskTable.date, monthEnd))
+      )
+  );
+
+  // 初回/範囲変更時のフェッチ（エラーログ用の保険）
   useEffect(() => {
-    // カレンダーのロケール設定を更新
+    let mounted = true;
+    (async () => {
+      try {
+        const list = await db
+          .select()
+          .from(taskTable)
+          .where(
+            and(gte(taskTable.date, monthStart), lte(taskTable.date, monthEnd))
+          );
+        if (mounted) setTasks(list as Task[]);
+      } catch (e) {
+        console.error("[CalendarView] DB fetch error:", e);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [monthStart, monthEnd]);
+
+  // Liveデータ反映
+  useEffect(() => {
+    if (liveTasks) setTasks(liveTasks as Task[]);
+  }, [liveTasks]);
+
+  // カレンダーのロケール設定を更新
+  useEffect(() => {
     updateCalendarLocale(locale);
   }, [locale, updateCalendarLocale]);
 
-  // 完了したタスクの日付を取得してマーク用のオブジェクトに変換
-  const completedDates = mockTasks
-    .filter((task) => task.isCompleted)
-    .map((task) => task.date);
-
-  // すべてのタスクの日付を取得
-  const allTaskDates = mockTasks.map((task) => task.date);
+  // markedDates 生成
+  const completedDates = tasks.filter((t) => t.isCompleted).map((t) => t.date);
+  const allTaskDates = tasks.map((t) => t.date);
 
   const markedDates = allTaskDates.reduce(
     (acc, date) => {
       const isCompleted = completedDates.includes(date);
       acc[date] = {
-        marked: true, // ドットを表示
-        dotColor: isCompleted ? "#10B981" : "#EF4444", // 完了は緑、未完了は赤（色を逆に）
+        marked: true,
+        dotColor: isCompleted ? "#10B981" : "#EF4444",
         selected: false,
       };
       return acc;
     },
-    {} as { [key: string]: any }
+    {} as Record<string, any>
   );
 
-  // 今日の日付をマーク
-  const today = new Date().toISOString().split("T")[0];
-  if (markedDates[today]) {
-    markedDates[today].selected = true;
-    markedDates[today].selectedColor = "#3B82F6";
+  // 今日を選択状態で強調表示
+  if (markedDates[todayYMD]) {
+    markedDates[todayYMD].selected = true;
+    markedDates[todayYMD].selectedColor = "#3B82F6";
   } else {
-    markedDates[today] = {
-      selected: true,
-      selectedColor: "#3B82F6",
-    };
+    markedDates[todayYMD] = { selected: true, selectedColor: "#3B82F6" };
   }
 
   const handleDayPress = (day: any) => {
@@ -55,11 +103,9 @@ export default function CalendarView() {
     setSelectedDate(day.dateString);
   };
 
-  // 年月表示を取得する関数
   const getHeaderText = (date: Date) => {
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
-
     if (locale === "en") {
       const monthNames = t("calendar.monthNames");
       return `${monthNames[month - 1]} ${year}`;
@@ -71,8 +117,8 @@ export default function CalendarView() {
   return (
     <View className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       <Calendar
-        key={locale} // ロケール変更時にカレンダーを再レンダリング
-        current="2025-08-07" // 2024年8月に設定してマークが表示されるようにする
+        key={locale}
+        current={todayYMD}
         markedDates={markedDates}
         onDayPress={handleDayPress}
         theme={{
@@ -93,15 +139,13 @@ export default function CalendarView() {
         enableSwipeMonths={true}
         firstDay={0}
         hideExtraDays={true}
-        renderHeader={(date) => {
-          return (
-            <View className="py-4">
-              <Text className="text-center text-lg font-bold text-gray-900">
-                {getHeaderText(date)}
-              </Text>
-            </View>
-          );
-        }}
+        renderHeader={(date) => (
+          <View className="py-4">
+            <Text className="text-center text-lg font-bold text-gray-900">
+              {getHeaderText(date)}
+            </Text>
+          </View>
+        )}
       />
     </View>
   );
