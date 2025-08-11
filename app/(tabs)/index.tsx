@@ -3,16 +3,19 @@ import ArrowButton from "@/components/arrow-button";
 import TabHeader from "@/components/screen-header";
 import TaskFormDialog from "@/components/task-form-dialog";
 import { useDayLabels } from "@/constants/day-labels";
-import { mockTasks } from "@/constants/mock-tasks";
+import { db } from "@/db/client";
+import { Task, taskTable } from "@/db/schema";
 import { getFormattedDateFromString } from "@/utils/date";
 import { useLocalization } from "@/utils/localization-context";
 import { Ionicons } from "@expo/vector-icons";
+import { eq, inArray } from "drizzle-orm";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import React, { useCallback, useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
-  const [tasks, setTasks] = useState(mockTasks);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [isTaskDialogVisible, setIsTaskDialogVisible] = useState(false);
   const [currentDate, setCurrentDate] = useState(() => {
     const today = new Date();
@@ -23,18 +26,28 @@ export default function HomeScreen() {
   // ローカライゼーションされたday-labelsを取得
   const dayLabels = useDayLabels();
 
-  // 今日の日付を取得
+  // 今日/昨日/明日の日付を先に算出
   const today = new Date();
   const todayStr = today.toISOString().split("T")[0];
-
-  // 昨日、今日、明日の日付を取得
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
   const yesterdayStr = yesterday.toISOString().split("T")[0];
-
   const tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1);
   const tomorrowStr = tomorrow.toISOString().split("T")[0];
+
+  // tasks を live に購読
+  const { data: liveTasks } = useLiveQuery(
+    db
+      .select()
+      .from(taskTable)
+      .where(inArray(taskTable.date, [yesterdayStr, todayStr, tomorrowStr]))
+  );
+
+  useEffect(() => {
+    if (liveTasks) setTasks(liveTasks as Task[]);
+  }, [liveTasks]);
+  console.log("tasks", tasks);
 
   // 有効な日付範囲かどうかをチェック
   const isValidDate = useCallback(
@@ -79,19 +92,28 @@ export default function HomeScreen() {
     return getFormattedDateFromString(date);
   };
 
-  const handleComplete = () => {
-    if (task) {
-      const updatedTasks = tasks.map((t) =>
-        t.id === task.id ? { ...t, isCompleted: true } : t
-      );
-      setTasks(updatedTasks);
+  const handleComplete = async () => {
+    if (!task) return;
+    try {
+      await db
+        .update(taskTable)
+        .set({ isCompleted: true, updatedAt: new Date().toISOString() })
+        .where(eq(taskTable.id, task.id));
+    } catch (error) {
+      console.error("UPDATE_TASK_FAILED", error);
     }
   };
 
-  const handleReset = () => {
-    setTasks(mockTasks);
-    const today = new Date();
-    setCurrentDate(today.toISOString().split("T")[0]);
+  const handleReset = async () => {
+    if (!task) return;
+    try {
+      await db
+        .update(taskTable)
+        .set({ isCompleted: false, updatedAt: new Date().toISOString() })
+        .where(eq(taskTable.id, task.id));
+    } catch (error) {
+      console.error("UPDATE_TASK_FAILED", error);
+    }
   };
 
   const handlePrevDay = () => {

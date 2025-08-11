@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
-export const tasks = sqliteTable("tasks", {
+export const taskTable = sqliteTable("tasks", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   date: text("date").notNull(),
   content: text("content").notNull(), // タスクの内容
@@ -17,5 +17,5 @@ export const tasks = sqliteTable("tasks", {
     .default(sql`(datetime('now'))`),
 });
 
-export type Task = typeof tasks.$inferSelect;
-export type CreateTask = typeof tasks.$inferInsert;
+export type Task = typeof taskTable.$inferSelect;
+export type CreateTask = typeof taskTable.$inferInsert;
