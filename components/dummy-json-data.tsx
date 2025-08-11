@@ -1,19 +1,13 @@
-import * as schema from "@/db/schema";
-import { Task } from "@/db/schema";
-import { drizzle } from "drizzle-orm/expo-sqlite";
-import { useSQLiteContext } from "expo-sqlite";
+import { db } from "@/db/client";
+import { Task, taskTable } from "@/db/schema";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 
 export default function DummyJsonData() {
   const [tasks, setTasks] = useState<Task[]>([]);
-
-  const db = useSQLiteContext();
-  const drizzleDb = drizzle(db, { schema });
-
   useEffect(() => {
     const load = async () => {
-      const tasks = await drizzleDb.query.tasks.findMany();
+      const tasks = await db.select().from(taskTable);
       setTasks(tasks);
     };
     load();

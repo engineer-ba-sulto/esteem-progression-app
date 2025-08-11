@@ -1,11 +1,11 @@
-import { tasks } from "@/db/schema";
+import { taskTable } from "@/db/schema";
 import { ExpoSQLiteDatabase } from "drizzle-orm/expo-sqlite";
 
 export default async function addDummyData(db: ExpoSQLiteDatabase) {
-  const count = await db.select().from(tasks);
+  const count = await db.select().from(taskTable);
   if (count.length > 0) return;
 
-  await db.insert(tasks).values([
+  await db.insert(taskTable).values([
     {
       date: "2024-01-15",
       content: "React Nativeの学習を開始する",

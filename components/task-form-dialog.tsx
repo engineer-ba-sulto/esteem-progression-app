@@ -1,3 +1,5 @@
+import { db } from "@/db/client";
+import { taskTable } from "@/db/schema";
 import { getFormattedDateFromString } from "@/utils/date";
 import { useLocalization } from "@/utils/localization-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -61,11 +63,16 @@ export default function TaskFormDialog({
     }
   }, [visible, reset, clearErrors]);
 
-  const onSubmit = (values: TaskFormValues) => {
-    console.log("CREATE_TASK", { date, ...values });
-    // フォームをリセット
-    reset();
-    onClose();
+  const onSubmit = async (values: TaskFormValues) => {
+    try {
+      console.log("CREATE_TASK", { date, ...values });
+      await db.insert(taskTable).values({ date, ...values });
+      // フォームをリセット
+      reset();
+      onClose();
+    } catch (error) {
+      console.error("CREATE_TASK_FAILED", error);
+    }
   };
 
   return (
@@ -131,7 +138,7 @@ export default function TaskFormDialog({
                     />
                     <View className="flex-row justify-end">
                       <Text className="text-xs text-gray-400 mt-1">
-                        {(value?.length ?? 0)}/100
+                        {value?.length ?? 0}/100
                       </Text>
                     </View>
                   </View>
@@ -169,7 +176,7 @@ export default function TaskFormDialog({
                     />
                     <View className="flex-row justify-end">
                       <Text className="text-xs text-gray-400 mt-1">
-                        {(value?.length ?? 0)}/200
+                        {value?.length ?? 0}/200
                       </Text>
                     </View>
                   </View>

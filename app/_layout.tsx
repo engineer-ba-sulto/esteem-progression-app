@@ -1,30 +1,17 @@
-import addDummyData from "@/db/addDummyData";
+import { DATABASE, db } from "@/db/client";
 import i18n from "@/locales";
 import { LocalizationProvider } from "@/utils/localization-context";
-import { drizzle } from "drizzle-orm/expo-sqlite";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import * as Localization from "expo-localization";
 import { Stack } from "expo-router";
-import { openDatabaseSync, SQLiteProvider } from "expo-sqlite";
+import { SQLiteProvider } from "expo-sqlite";
 import { Suspense, useEffect } from "react";
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 import { LocaleConfig } from "react-native-calendars";
 import migrations from "../drizzle/migrations";
 import "../global.css";
 
-export const DATABASE_NAME = "test.db";
-
 export default function RootLayout() {
-  const expoDb = openDatabaseSync(DATABASE_NAME);
-  const db = drizzle(expoDb);
-  const { success, error } = useMigrations(db, migrations);
-
-  useEffect(() => {
-    if (success) {
-      addDummyData(db);
-    }
-  }, [success, db]);
-
   useEffect(() => {
     // ローカライゼーションの初期化
     const deviceLocale = Localization.getLocales()[0]?.languageCode || "ja";
@@ -138,13 +125,33 @@ export default function RootLayout() {
 
   return (
     <Suspense fallback={<ActivityIndicator size="large" />}>
-      <SQLiteProvider databaseName={DATABASE_NAME} useSuspense>
-        <LocalizationProvider>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" options={{ title: "Home" }} />
-          </Stack>
-        </LocalizationProvider>
-      </SQLiteProvider>
+      <MigrationGate />
     </Suspense>
+  );
+}
+
+function MigrationGate() {
+  const { success, error } = useMigrations(db, migrations);
+
+  if (error) {
+    return (
+      <View>
+        <Text>Migration error: {error.message}</Text>
+      </View>
+    );
+  }
+
+  if (!success) {
+    return <ActivityIndicator size="large" />;
+  }
+
+  return (
+    <SQLiteProvider databaseName={DATABASE} useSuspense>
+      <LocalizationProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" options={{ title: "Home" }} />
+        </Stack>
+      </LocalizationProvider>
+    </SQLiteProvider>
   );
 }
