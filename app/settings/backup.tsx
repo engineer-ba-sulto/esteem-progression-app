@@ -1,4 +1,5 @@
 import TabHeader from "@/components/screen-header";
+import { formatDate } from "@/utils/date";
 import { useLocalization } from "@/utils/localization-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -30,7 +31,7 @@ export default function BackupScreen() {
           onPress: () => {
             // ここでバックアップ処理を実装
             console.log("バックアップを作成しました");
-            setLastBackupDate(new Date().toLocaleString("ja-JP"));
+            setLastBackupDate(formatDate(new Date(), "yyyy/MM/dd HH:mm"));
             Alert.alert(
               t("backup.backupCompleted"),
               t("backup.backupCreatedMessage")
