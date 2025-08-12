@@ -5,7 +5,15 @@ import TaskFormDialog from "@/components/task-form-dialog";
 import { useDayLabels } from "@/constants/day-labels";
 import { db } from "@/db/client";
 import { Task, taskTable } from "@/db/schema";
-import { getFormattedDateFromString } from "@/utils/date";
+import {
+  addDaysToDate,
+  getDayType,
+  getFormattedDateFromString,
+  getTodayISODate,
+  getTomorrowISODate,
+  getYesterdayISODate,
+  subtractDaysFromDate,
+} from "@/utils/date";
 import { useLocalization } from "@/utils/localization-context";
 import { Ionicons } from "@expo/vector-icons";
 import { eq, inArray } from "drizzle-orm";
@@ -15,16 +23,10 @@ import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
-  // 日本時間でYYYY-MM-DD形式の日付を取得する関数
-  const getJapaneseISODate = (date: Date) => {
-    return date.toLocaleDateString("ja-JP").replace(/\//g, "-");
-  };
-
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isTaskDialogVisible, setIsTaskDialogVisible] = useState(false);
   const [currentDate, setCurrentDate] = useState(() => {
-    const today = new Date();
-    return getJapaneseISODate(today); // YYYY-MM-DD形式で日本時間
+    return getTodayISODate(); // YYYY-MM-DD形式で日本時間
   });
   const { t } = useLocalization();
 
@@ -32,14 +34,9 @@ export default function HomeScreen() {
   const dayLabels = useDayLabels();
 
   // 今日/昨日/明日の日付を先に算出（日本時間）
-  const today = new Date();
-  const todayStr = getJapaneseISODate(today); // YYYY-MM-DD形式で日本時間
-  const yesterday = new Date(today);
-  yesterday.setDate(today.getDate() - 1);
-  const yesterdayStr = getJapaneseISODate(yesterday);
-  const tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
-  const tomorrowStr = getJapaneseISODate(tomorrow);
+  const todayStr = getTodayISODate(); // YYYY-MM-DD形式で日本時間
+  const yesterdayStr = getYesterdayISODate();
+  const tomorrowStr = getTomorrowISODate();
 
   // tasks を live に購読
   const { data: liveTasks } = useLiveQuery(
@@ -79,10 +76,17 @@ export default function HomeScreen() {
 
   // 現在の日付が今日、明日、昨日のどれかを判断
   const getDayLabel = (date: string) => {
-    if (date === todayStr) return dayLabels.today;
-    if (date === tomorrowStr) return dayLabels.tomorrow;
-    if (date === yesterdayStr) return dayLabels.yesterday;
-    return getFormattedDateFromString(date);
+    const dayType = getDayType(date);
+    switch (dayType) {
+      case "today":
+        return dayLabels.today;
+      case "tomorrow":
+        return dayLabels.tomorrow;
+      case "yesterday":
+        return dayLabels.yesterday;
+      default:
+        return getFormattedDateFromString(date);
+    }
   };
 
   const handleComplete = async () => {
@@ -110,9 +114,7 @@ export default function HomeScreen() {
   };
 
   const handlePrevDay = () => {
-    const current = new Date(currentDate);
-    current.setDate(current.getDate() - 1);
-    const newDate = getJapaneseISODate(current);
+    const newDate = subtractDaysFromDate(currentDate, 1);
 
     // 昨日より前には行けない
     if (newDate >= yesterdayStr) {
@@ -121,9 +123,7 @@ export default function HomeScreen() {
   };
 
   const handleNextDay = () => {
-    const current = new Date(currentDate);
-    current.setDate(current.getDate() + 1);
-    const newDate = getJapaneseISODate(current);
+    const newDate = addDaysToDate(currentDate, 1);
 
     // 明日より後には行けない
     if (newDate <= tomorrowStr) {
@@ -222,27 +222,19 @@ const EmptyStateScreenInternal: React.FC<{
 }> = ({ date, dayLabels, onOpenDialog }) => {
   const { t } = useLocalization();
 
-  // 日本時間でYYYY-MM-DD形式の日付を取得する関数
-  const getJapaneseISODate = (date: Date) => {
-    return date.toLocaleDateString("ja-JP").replace(/\//g, "-");
-  };
-
   // 現在の日付が今日、明日、昨日のどれかを判断
   const getDayLabel = (date: string) => {
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
-
-    const todayStr = getJapaneseISODate(today);
-    const tomorrowStr = getJapaneseISODate(tomorrow);
-    const yesterdayStr = getJapaneseISODate(yesterday);
-
-    if (date === todayStr) return dayLabels.today;
-    if (date === tomorrowStr) return dayLabels.tomorrow;
-    if (date === yesterdayStr) return dayLabels.yesterday;
-    return getFormattedDateFromString(date);
+    const dayType = getDayType(date);
+    switch (dayType) {
+      case "today":
+        return dayLabels.today;
+      case "tomorrow":
+        return dayLabels.tomorrow;
+      case "yesterday":
+        return dayLabels.yesterday;
+      default:
+        return getFormattedDateFromString(date);
+    }
   };
 
   return (

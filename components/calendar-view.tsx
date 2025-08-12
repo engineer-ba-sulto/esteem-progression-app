@@ -1,5 +1,10 @@
 import { db } from "@/db/client";
 import { Task, taskTable } from "@/db/schema";
+import {
+  getCalendarDateInfo,
+  getMonthRange,
+  getTodayISODate,
+} from "@/utils/date";
 import { useLocalization } from "@/utils/localization-context";
 import { and, gte, lte } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
@@ -7,24 +12,15 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Text, View } from "react-native";
 import { Calendar } from "react-native-calendars";
 
-const toYMD = (d: Date) => {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-};
-
 export default function CalendarView() {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [selectedDate, setSelectedDate] = useState("");
+
   const { t, locale, updateCalendarLocale } = useLocalization();
 
   // 今日と当月範囲（ローカルタイムで算出してYYYY-MM-DD化）
   const { todayYMD, monthStart, monthEnd } = useMemo(() => {
-    const now = new Date();
-    const today = toYMD(now);
-    const start = toYMD(new Date(now.getFullYear(), now.getMonth(), 1));
-    const end = toYMD(new Date(now.getFullYear(), now.getMonth() + 1, 0));
+    const today = getTodayISODate();
+    const { start, end } = getMonthRange();
     return { todayYMD: today, monthStart: start, monthEnd: end };
   }, []);
 
@@ -100,17 +96,15 @@ export default function CalendarView() {
     const monthText = locale === "en" ? `${day.month}` : `${day.month}月`;
     const dayText = locale === "en" ? `${day.day}` : `${day.day}日`;
     console.log(`${selectedDateText}: ${yearText}${monthText}${dayText}`);
-    setSelectedDate(day.dateString);
   };
 
   const getHeaderText = (date: Date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
+    const dateInfo = getCalendarDateInfo(date);
     if (locale === "en") {
       const monthNames = t("calendar.monthNames");
-      return `${monthNames[month - 1]} ${year}`;
+      return `${monthNames[dateInfo.month - 1]} ${dateInfo.year}`;
     } else {
-      return `${year}年${month}月`;
+      return `${dateInfo.year}年${dateInfo.month}月`;
     }
   };
 
