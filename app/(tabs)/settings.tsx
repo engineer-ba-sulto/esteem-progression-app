@@ -9,16 +9,47 @@ import {
   StarIcon,
   TrashIcon,
 } from "@/components/icons";
-import SettingCard from "@/components/setting-card";
 import TabHeader from "@/components/screen-header";
+import SettingCard from "@/components/setting-card";
+import { deleteAllData, getDatabaseStats } from "@/db/client";
 import { useLocalization } from "@/utils/localization-context";
 import { router } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+interface DatabaseStats {
+  totalTasks: number;
+  completedTasks: number;
+  pendingTasks: number;
+}
+
 export default function SettingsScreen() {
   const { t, locale, changeLocale, getAvailableLocales } = useLocalization();
+  const [databaseStats, setDatabaseStats] = useState<DatabaseStats | null>(
+    null
+  );
+  const [isLoading, setIsLoading] = useState(false);
+
+  // データベース統計を取得
+  const loadDatabaseStats = async () => {
+    try {
+      const stats = await getDatabaseStats();
+      if (stats.success && "totalTasks" in stats) {
+        setDatabaseStats({
+          totalTasks: stats.totalTasks!,
+          completedTasks: stats.completedTasks!,
+          pendingTasks: stats.pendingTasks!,
+        });
+      }
+    } catch (error) {
+      console.error("統計情報の取得に失敗:", error);
+    }
+  };
+
+  useEffect(() => {
+    loadDatabaseStats();
+  }, []);
 
   const handleHelpPress = () => {
     console.log("ヘルプとフィードバックがタップされました");
@@ -47,24 +78,60 @@ export default function SettingsScreen() {
   };
 
   const handleDataDeletionPress = () => {
+    // データ統計を表示
+    const statsMessage = databaseStats
+      ? `${t("settings.dataStats")}:\n${t("settings.totalTasks")}: ${databaseStats.totalTasks}\n${t("settings.completedTasks")}: ${databaseStats.completedTasks}\n${t("settings.pendingTasks")}: ${databaseStats.pendingTasks}`
+      : "";
+
     Alert.alert(
       t("settings.dataDeletionTitle"),
-      t("settings.dataDeletionMessage"),
+      `${t("settings.dataDeletionWarning")}\n\n${t("settings.dataDeletionDetails")}\n\n${statsMessage}`,
       [
         {
-          text: t("common.cancel"),
+          text: t("settings.dataDeletionCancel"),
           style: "cancel",
         },
         {
-          text: t("common.delete"),
+          text: t("settings.dataDeletionConfirm"),
           style: "destructive",
-          onPress: () => {
-            console.log("データ削除が実行されました");
-            // 実際のデータ削除処理をここに実装
+          onPress: async () => {
+            await executeDataDeletion();
           },
         },
       ]
     );
+  };
+
+  const executeDataDeletion = async () => {
+    setIsLoading(true);
+    try {
+      const result = await deleteAllData();
+
+      if (result.success) {
+        Alert.alert(t("settings.dataDeletionSuccess"), result.message, [
+          {
+            text: t("common.confirm"),
+            onPress: () => {
+              // 統計情報を更新
+              loadDatabaseStats();
+            },
+          },
+        ]);
+      } else {
+        Alert.alert(t("settings.dataDeletionError"), result.message, [
+          { text: t("common.confirm") },
+        ]);
+      }
+    } catch (error) {
+      console.error("データ削除エラー:", error);
+      Alert.alert(
+        t("settings.dataDeletionError"),
+        "予期しないエラーが発生しました",
+        [{ text: t("common.confirm") }]
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -103,8 +170,9 @@ export default function SettingsScreen() {
           />
           <SettingCard
             icon={<TrashIcon />}
-            label={t("settings.deleteData")}
+            label={`${t("settings.deleteData")}${isLoading ? " (処理中...)" : ""}`}
             onPress={handleDataDeletionPress}
+            disabled={isLoading}
           />
           <Text className="px-4 mt-6 text-sm font-semibold text-gray-500 mb-2">
             {t("settings.support")}
