@@ -1,10 +1,10 @@
-import AchievementCard from "@/components/achievement-card";
-import AdBanner from "@/components/adbanner";
+// import AchievementCard from "@/components/achievement-card";
+// import AdBanner from "@/components/adbanner";
 import CalendarView from "@/components/calendar-view";
-import { UserCircleIcon } from "@/components/icons";
+// import { UserCircleIcon } from "@/components/icons";
 import TabHeader from "@/components/screen-header";
-import StatCard from "@/components/stat-card";
-import { useRecords } from "@/constants/record";
+// import StatCard from "@/components/stat-card";
+// import { useRecords } from "@/constants/record";
 import { useLocalization } from "@/utils/localization-context";
 import React from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -12,7 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RecordScreen() {
   const { t } = useLocalization();
-  const records = useRecords();
+  // const records = useRecords();
 
   return (
     <SafeAreaView className="flex flex-col h-full bg-blue-50" edges={["top"]}>
@@ -21,15 +21,15 @@ export default function RecordScreen() {
 
       {/* Main Content */}
       <ScrollView className="flex-1 p-4">
-        <View className="flex flex-col items-center text-center my-4">
+        {/* <View className="flex flex-col items-center text-center my-4">
           <UserCircleIcon />
           <Text className="text-2xl font-bold mt-3 text-gray-900">
             田中 太郎
           </Text>
           <Text className="text-gray-500">taro.tanaka@example.com</Text>
-        </View>
+        </View> */}
 
-        <View className="my-8">
+        {/* <View className="my-8">
           <Text className="px-2 text-sm font-semibold text-gray-500 mb-2">
             {t("records.title")}
           </Text>
@@ -53,16 +53,16 @@ export default function RecordScreen() {
               color="text-green-500"
             />
           </View>
-        </View>
+        </View> */}
 
         <View className="my-8">
-          <Text className="px-2 text-sm font-semibold text-gray-500 mb-2">
+          {/* <Text className="px-2 text-sm font-semibold text-gray-500 mb-2">
             {t("records.monthlyCalendar")}
-          </Text>
+          </Text> */}
           <CalendarView />
         </View>
 
-        <View className="my-8">
+        {/* <View className="my-8">
           <Text className="px-2 text-sm font-semibold text-gray-500 mb-2">
             {t("records.title")}
           </Text>
@@ -76,9 +76,9 @@ export default function RecordScreen() {
               />
             ))}
           </View>
-        </View>
+        </View> */}
       </ScrollView>
-      <AdBanner />
+      {/* <AdBanner /> */}
     </SafeAreaView>
   );
 }

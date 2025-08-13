@@ -1,4 +1,4 @@
-import AdBanner from "@/components/adbanner";
+// import AdBanner from "@/components/adbanner";
 import ArrowButton from "@/components/arrow-button";
 import TabHeader from "@/components/screen-header";
 import TaskFormDialog from "@/components/task-form-dialog";
@@ -210,7 +210,7 @@ export default function HomeScreen() {
         onClose={() => setIsTaskDialogVisible(false)}
         date={currentDate}
       />
-      <AdBanner />
+      {/* <AdBanner /> */}
     </SafeAreaView>
   );
 }

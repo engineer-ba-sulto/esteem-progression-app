@@ -16,7 +16,7 @@ export default function RootLayout() {
     // ローカライゼーションの初期化
     const deviceLocale = Localization.getLocales()[0]?.languageCode || "ja";
     i18n.locale = deviceLocale;
-    console.log(`アプリの言語が設定されました: ${deviceLocale}`);
+    // console.log(`アプリの言語が設定されました: ${deviceLocale}`);
 
     // カレンダーのロケール初期化
     initializeCalendarLocale(deviceLocale);
@@ -120,7 +120,7 @@ export default function RootLayout() {
     };
 
     LocaleConfig.defaultLocale = locale;
-    console.log(`カレンダーのロケールが初期化されました: ${locale}`);
+    // console.log(`カレンダーのロケールが初期化されました: ${locale}`);
   };
 
   return (
