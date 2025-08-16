@@ -7,10 +7,15 @@ import {
   useForeground,
 } from "react-native-google-mobile-ads";
 
+const iosAdUnitId = "ca-app-pub-2054344840815103/6971729651";
+const androidAdUnitId = TestIds.BANNER; // テストID
+
 // テスト用の広告ユニットID（開発時はテストID、本番時は実際のIDを使用）
 const adUnitId = __DEV__
   ? TestIds.BANNER
-  : "ca-app-pub-3940256099942544/6300978111";
+  : Platform.OS === "ios"
+    ? iosAdUnitId
+    : androidAdUnitId;
 
 interface AdBannerProps {
   size?: BannerAdSize;

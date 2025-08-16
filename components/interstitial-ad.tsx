@@ -6,10 +6,15 @@ import {
   TestIds,
 } from "react-native-google-mobile-ads";
 
+const iosAdUnitId = "ca-app-pub-2054344840815103/2691936811";
+const androidAdUnitId = TestIds.BANNER; // テストID
+
 // テスト用の広告ユニットID（開発時はテストID、本番時は実際のIDを使用）
 const adUnitId = __DEV__
-  ? TestIds.INTERSTITIAL
-  : "ca-app-pub-3940256099942544/1033173712";
+  ? TestIds.BANNER
+  : Platform.OS === "ios"
+    ? iosAdUnitId
+    : androidAdUnitId;
 
 const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
   keywords: ["productivity", "self-improvement"],
