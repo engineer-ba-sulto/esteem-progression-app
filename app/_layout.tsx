@@ -8,6 +8,7 @@ import { SQLiteProvider } from "expo-sqlite";
 import { Suspense, useEffect } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { LocaleConfig } from "react-native-calendars";
+import mobileAds, { MaxAdContentRating } from "react-native-google-mobile-ads";
 import migrations from "../drizzle/migrations";
 import "../global.css";
 
@@ -20,7 +21,32 @@ export default function RootLayout() {
 
     // カレンダーのロケール初期化
     initializeCalendarLocale(deviceLocale);
+
+    // Google Mobile Ads SDKの初期化
+    initializeMobileAds();
   }, []);
+
+  const initializeMobileAds = async () => {
+    try {
+      // 広告リクエストの設定
+      await mobileAds().setRequestConfiguration({
+        // すべての広告リクエストに適したコンテンツ評価を設定
+        maxAdContentRating: MaxAdContentRating.PG,
+        // COPPAの目的でコンテンツを児童向けとして扱うことを示す
+        tagForChildDirectedTreatment: false,
+        // 同意年齢未満のユーザーに適した方法で広告リクエストを処理することを示す
+        tagForUnderAgeOfConsent: false,
+        // テストデバイスIDを設定
+        testDeviceIdentifiers: ['EMULATOR'],
+      });
+
+      // Google Mobile Ads SDKを初期化
+      const adapterStatuses = await mobileAds().initialize();
+      console.log('Google Mobile Ads SDK initialized:', adapterStatuses);
+    } catch (error) {
+      console.error('Failed to initialize Google Mobile Ads SDK:', error);
+    }
+  };
 
   const initializeCalendarLocale = (locale: string) => {
     const monthNames =

@@ -17,6 +17,7 @@ import {
   View,
 } from "react-native";
 import { z } from "zod";
+import { useInterstitialAd } from "./interstitial-ad";
 
 export default function TaskFormDialog({
   visible,
@@ -28,6 +29,7 @@ export default function TaskFormDialog({
   date: string;
 }) {
   const { t } = useLocalization();
+  const { showAd } = useInterstitialAd();
   // ロケールに応じてメッセージを切り替えるため、スキーマはコンポーネント内で生成
   const TaskSchema = z.object({
     content: z
@@ -70,6 +72,11 @@ export default function TaskFormDialog({
       // フォームをリセット
       reset();
       onClose();
+
+      // タスク登録後にインタースティシャル広告を表示
+      setTimeout(() => {
+        showAd();
+      }, 1000); // ダイアログが閉じるのを待ってから広告を表示
     } catch (error) {
       console.error("CREATE_TASK_FAILED", error);
     }
