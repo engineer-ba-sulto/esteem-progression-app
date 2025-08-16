@@ -11,7 +11,7 @@ const androidAdUnitId = TestIds.BANNER; // テストID
 
 // テスト用の広告ユニットID（開発時はテストID、本番時は実際のIDを使用）
 const adUnitId = __DEV__
-  ? TestIds.BANNER
+  ? TestIds.INTERSTITIAL
   : Platform.OS === "ios"
     ? iosAdUnitId
     : androidAdUnitId;
