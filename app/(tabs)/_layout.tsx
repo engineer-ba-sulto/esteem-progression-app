@@ -34,7 +34,7 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="recond"
+        name="record"
         options={{
           title: t("tabs.record"),
           tabBarIcon: ({ color, size }) => (
