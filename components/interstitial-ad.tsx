@@ -7,7 +7,7 @@ import {
 } from "react-native-google-mobile-ads";
 
 const iosAdUnitId = "ca-app-pub-2054344840815103/2691936811";
-const androidAdUnitId = TestIds.BANNER; // テストID
+const androidAdUnitId = TestIds.INTERSTITIAL; // テストID
 
 // テスト用の広告ユニットID（開発時はテストID、本番時は実際のIDを使用）
 const adUnitId = __DEV__
@@ -17,17 +17,25 @@ const adUnitId = __DEV__
     : androidAdUnitId;
 
 const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
-  keywords: ["productivity", "self-improvement"],
+  keywords: [
+    "productivity",
+    "self-improvement",
+    "task-management",
+    "self-help",
+  ],
+  requestNonPersonalizedAdsOnly: false,
 });
 
 interface InterstitialAdHook {
   loaded: boolean;
+  error: string | null;
   showAd: () => void;
   loadAd: () => void;
 }
 
 export function useInterstitialAd(): InterstitialAdHook {
   const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribeLoaded = interstitial.addAdEventListener(
@@ -62,13 +70,20 @@ export function useInterstitialAd(): InterstitialAdHook {
     const unsubscribeError = interstitial.addAdEventListener(
       AdEventType.ERROR,
       (error) => {
-        console.log("Interstitial ad error:", error);
         setLoaded(false);
+        setError(error.message || "Unknown error");
+        // エラー後、少し待ってから再読み込みを試行
+        setTimeout(() => {
+          setError(null);
+          interstitial.load();
+        }, 5000);
       }
     );
 
-    // 初回広告を読み込み
-    interstitial.load();
+    // 少し遅延させてから読み込みを開始
+    setTimeout(() => {
+      interstitial.load();
+    }, 1000);
 
     // コンポーネントのアンマウント時にイベントリスナーを解除
     return () => {
@@ -82,6 +97,20 @@ export function useInterstitialAd(): InterstitialAdHook {
   const showAd = () => {
     if (loaded) {
       interstitial.show();
+    } else {
+      // エラーがある場合は先にクリア
+      if (error) {
+        setError(null);
+      }
+      // 広告が読み込まれたら自動的に表示する
+      const unsubscribeLoaded = interstitial.addAdEventListener(
+        AdEventType.LOADED,
+        () => {
+          interstitial.show();
+          unsubscribeLoaded();
+        }
+      );
+      interstitial.load();
     }
   };
 
@@ -91,5 +120,5 @@ export function useInterstitialAd(): InterstitialAdHook {
     }
   };
 
-  return { loaded, showAd, loadAd };
+  return { loaded, error, showAd, loadAd };
 }
