@@ -55,13 +55,21 @@ export const getDayType = (
 
 // 日付文字列をロケール対応でフォーマット
 export const getFormattedDateFromString = (dateString: string): string => {
-  const date = parseISO(dateString);
-  const locale = getLocale();
+  try {
+    if (!dateString || dateString.trim() === "") {
+      return "";
+    }
+    const date = parseISO(dateString);
+    const locale = getLocale();
 
-  if (locale === ja) {
-    return format(date, "yyyy年M月d日", { locale });
-  } else {
-    return format(date, "MMMM d, yyyy", { locale });
+    if (locale === ja) {
+      return format(date, "yyyy年M月d日", { locale });
+    } else {
+      return format(date, "MMMM d, yyyy", { locale });
+    }
+  } catch (error) {
+    console.error("Error formatting date:", dateString, error);
+    return "";
   }
 };
 

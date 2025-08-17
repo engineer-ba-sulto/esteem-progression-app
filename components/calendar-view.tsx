@@ -11,9 +11,15 @@ import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import React, { useEffect, useMemo, useState } from "react";
 import { Text, View } from "react-native";
 import { Calendar } from "react-native-calendars";
+import TaskFormDialog from "./task-form-dialog";
+import TaskViewDialog from "./task-view-dialog";
 
 export default function CalendarView() {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string>(getTodayISODate());
+  const [showTaskViewDialog, setShowTaskViewDialog] = useState(false);
+  const [showTaskFormDialog, setShowTaskFormDialog] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const { t, locale, updateCalendarLocale } = useLocalization();
 
@@ -91,11 +97,25 @@ export default function CalendarView() {
   }
 
   const handleDayPress = (day: any) => {
-    const selectedDateText = t("calendar.selectedDate");
-    const yearText = locale === "en" ? `${day.year}` : `${day.year}年`;
-    const monthText = locale === "en" ? `${day.month}` : `${day.month}月`;
-    const dayText = locale === "en" ? `${day.day}` : `${day.day}日`;
-    console.log(`${selectedDateText}: ${yearText}${monthText}${dayText}`);
+    const dateString = `${day.year}-${String(day.month).padStart(2, "0")}-${String(day.day).padStart(2, "0")}`;
+    setSelectedDate(dateString);
+    setShowTaskViewDialog(true);
+  };
+
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task);
+    setShowTaskFormDialog(true);
+    setShowTaskViewDialog(false); // TaskViewDialogを即座に閉じる
+  };
+
+  const handleCloseTaskViewDialog = () => {
+    setShowTaskViewDialog(false);
+    setSelectedDate(getTodayISODate());
+  };
+
+  const handleCloseTaskFormDialog = () => {
+    setShowTaskFormDialog(false);
+    setEditingTask(null);
   };
 
   const getHeaderText = (date: Date) => {
@@ -140,6 +160,22 @@ export default function CalendarView() {
             </Text>
           </View>
         )}
+      />
+
+      {/* Task View Dialog */}
+      <TaskViewDialog
+        visible={showTaskViewDialog}
+        onClose={handleCloseTaskViewDialog}
+        date={selectedDate}
+        onEdit={handleEditTask}
+      />
+
+      {/* Task Form Dialog for Editing */}
+      <TaskFormDialog
+        visible={showTaskFormDialog}
+        onClose={handleCloseTaskFormDialog}
+        date={editingTask?.date || selectedDate}
+        editingTask={editingTask}
       />
     </View>
   );
