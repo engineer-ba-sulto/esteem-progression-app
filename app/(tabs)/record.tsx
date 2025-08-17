@@ -1,10 +1,10 @@
-// import AchievementCard from "@/components/achievement-card";
+import AchievementCard from "@/components/achievement-card";
 import AdBanner from "@/components/adbanner";
 import CalendarView from "@/components/calendar-view";
 // import { UserCircleIcon } from "@/components/icons";
 import TabHeader from "@/components/screen-header";
 import StatCard from "@/components/stat-card";
-// import { useRecords } from "@/constants/record";
+import { useRecords } from "@/constants/record";
 import { db, schema } from "@/db/client";
 import { useLocalization } from "@/utils/localization-context";
 import {
@@ -19,7 +19,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RecordScreen() {
   const { t } = useLocalization();
-  // const records = useRecords();
 
   // DBからタスクデータを取得（Live Query）
   const { data: tasks } = useLiveQuery(db.select().from(schema.taskTable));
@@ -36,6 +35,9 @@ export default function RecordScreen() {
     () => calculateTotalCompleted(tasks || []),
     [tasks]
   );
+
+  // 実績データの取得（動的判定）
+  const records = useRecords(tasks || []);
 
   return (
     <SafeAreaView className="flex flex-col h-full bg-blue-50" edges={["top"]}>
@@ -79,13 +81,13 @@ export default function RecordScreen() {
         </View>
 
         <View className="my-8">
-          {/* <Text className="px-2 text-sm font-semibold text-gray-500 mb-2">
+          <Text className="px-2 text-sm font-semibold text-gray-500 mb-2">
             {t("records.monthlyCalendar")}
-          </Text> */}
+          </Text>
           <CalendarView />
         </View>
 
-        {/* <View className="my-8">
+        <View className="my-8">
           <Text className="px-2 text-sm font-semibold text-gray-500 mb-2">
             {t("records.title")}
           </Text>
@@ -99,7 +101,7 @@ export default function RecordScreen() {
               />
             ))}
           </View>
-        </View> */}
+        </View>
       </ScrollView>
       <AdBanner />
     </SafeAreaView>
