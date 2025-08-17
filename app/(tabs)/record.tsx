@@ -5,14 +5,37 @@ import CalendarView from "@/components/calendar-view";
 import TabHeader from "@/components/screen-header";
 import StatCard from "@/components/stat-card";
 // import { useRecords } from "@/constants/record";
+import { db, schema } from "@/db/client";
 import { useLocalization } from "@/utils/localization-context";
-import React from "react";
+import {
+  calculateBestStreak,
+  calculateCurrentStreak,
+  calculateTotalCompleted,
+} from "@/utils/statistics";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import React, { useMemo } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RecordScreen() {
   const { t } = useLocalization();
   // const records = useRecords();
+
+  // DBからタスクデータを取得（Live Query）
+  const { data: tasks } = useLiveQuery(db.select().from(schema.taskTable));
+
+  // 統計の計算（メモ化でパフォーマンス最適化）
+  const currentStreak = useMemo(
+    () => calculateCurrentStreak(tasks || []),
+    [tasks]
+  );
+
+  const bestStreak = useMemo(() => calculateBestStreak(tasks || []), [tasks]);
+
+  const totalCompleted = useMemo(
+    () => calculateTotalCompleted(tasks || []),
+    [tasks]
+  );
 
   return (
     <SafeAreaView className="flex flex-col h-full bg-blue-50" edges={["top"]}>
@@ -35,19 +58,19 @@ export default function RecordScreen() {
           </Text>
           <View className="flex flex-row gap-4">
             <StatCard
-              value="15"
+              value={currentStreak.toString()}
               unit={t("records.streakDays")}
               label={t("records.currentStreak")}
               color="text-yellow-500"
             />
             <StatCard
-              value="25"
+              value={bestStreak.toString()}
               unit={t("records.streakDays")}
               label={t("records.bestStreak")}
               color="text-blue-500"
             />
             <StatCard
-              value="76"
+              value={totalCompleted.toString()}
               unit={t("records.recordsCount")}
               label={t("records.totalRecords")}
               color="text-green-500"

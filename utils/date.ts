@@ -163,3 +163,9 @@ export const subtractDaysFromDate = (
 export const formatDate = (date: Date, formatString: string): string => {
   return format(date, formatString, { locale: getLocale() });
 };
+
+// 連続日判定関数（統計計算用）
+export const isConsecutiveDay = (date1: string, date2: string): boolean => {
+  const diff = getDaysDifference(date1, date2);
+  return diff === 1;
+};
