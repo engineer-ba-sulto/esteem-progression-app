@@ -3,11 +3,11 @@ import AdBanner from "@/components/adbanner";
 import CalendarView from "@/components/calendar-view";
 // import { UserCircleIcon } from "@/components/icons";
 import TabHeader from "@/components/screen-header";
-// import StatCard from "@/components/stat-card";
+import StatCard from "@/components/stat-card";
 // import { useRecords } from "@/constants/record";
 import { useLocalization } from "@/utils/localization-context";
 import React from "react";
-import { ScrollView, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RecordScreen() {
@@ -29,7 +29,7 @@ export default function RecordScreen() {
           <Text className="text-gray-500">taro.tanaka@example.com</Text>
         </View> */}
 
-        {/* <View className="my-8">
+        <View className="my-8">
           <Text className="px-2 text-sm font-semibold text-gray-500 mb-2">
             {t("records.title")}
           </Text>
@@ -53,7 +53,7 @@ export default function RecordScreen() {
               color="text-green-500"
             />
           </View>
-        </View> */}
+        </View>
 
         <View className="my-8">
           {/* <Text className="px-2 text-sm font-semibold text-gray-500 mb-2">
