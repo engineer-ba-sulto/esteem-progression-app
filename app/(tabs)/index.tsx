@@ -1,4 +1,4 @@
-// import AdBanner from "@/components/adbanner";
+import AdBanner from "@/components/adbanner";
 import ArrowButton from "@/components/arrow-button";
 import TabHeader from "@/components/screen-header";
 import TaskFormDialog from "@/components/task-form-dialog";
@@ -160,9 +160,9 @@ export default function HomeScreen() {
       />
 
       {/* Main Content */}
-      <View className="flex-1 flex flex-col items-center justify-center px-6">
+      <View className="flex-1 px-6">
         {task && !task.isCompleted ? (
-          <View className="w-full text-center flex flex-col items-center">
+          <View className="text-center flex-1 flex-col items-center justify-center">
             <View className="w-full p-6 bg-white rounded-2xl border border-gray-200 shadow-md">
               <Text className="text-2xl font-bold text-center">
                 {task.content}
@@ -183,7 +183,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
         ) : task && task.isCompleted ? (
-          <View className="text-center">
+          <View className="text-center flex-1 flex-col items-center justify-center">
             <Text className="text-7xl text-center mb-6">🎉</Text>
             <Text className="text-3xl font-bold text-gray-900 text-center">
               {t("home.congratulations")}
@@ -198,11 +198,13 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
         ) : (
-          <EmptyStateScreenInternal
-            date={currentDate}
-            dayLabels={dayLabels}
-            onOpenDialog={() => setIsTaskDialogVisible(true)}
-          />
+          <View className="flex-1 justify-center items-center">
+            <EmptyStateScreenInternal
+              date={currentDate}
+              dayLabels={dayLabels}
+              onOpenDialog={() => setIsTaskDialogVisible(true)}
+            />
+          </View>
         )}
       </View>
       <TaskFormDialog
@@ -210,7 +212,7 @@ export default function HomeScreen() {
         onClose={() => setIsTaskDialogVisible(false)}
         date={currentDate}
       />
-      {/* <AdBanner /> */}
+      <AdBanner />
     </SafeAreaView>
   );
 }

@@ -1,5 +1,5 @@
 // import AchievementCard from "@/components/achievement-card";
-// import AdBanner from "@/components/adbanner";
+import AdBanner from "@/components/adbanner";
 import CalendarView from "@/components/calendar-view";
 // import { UserCircleIcon } from "@/components/icons";
 import TabHeader from "@/components/screen-header";
@@ -7,7 +7,7 @@ import TabHeader from "@/components/screen-header";
 // import { useRecords } from "@/constants/record";
 import { useLocalization } from "@/utils/localization-context";
 import React from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RecordScreen() {
@@ -78,7 +78,7 @@ export default function RecordScreen() {
           </View>
         </View> */}
       </ScrollView>
-      {/* <AdBanner /> */}
+      <AdBanner />
     </SafeAreaView>
   );
 }

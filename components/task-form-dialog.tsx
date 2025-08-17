@@ -1,9 +1,10 @@
 import { db } from "@/db/client";
-import { taskTable } from "@/db/schema";
+import { Task, taskTable } from "@/db/schema";
 import { getFormattedDateFromString } from "@/utils/date";
 import { useLocalization } from "@/utils/localization-context";
 import { Ionicons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { eq } from "drizzle-orm";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -17,17 +18,21 @@ import {
   View,
 } from "react-native";
 import { z } from "zod";
+import { useInterstitialAd } from "./interstitial-ad";
 
 export default function TaskFormDialog({
   visible,
   onClose,
   date,
+  editingTask,
 }: {
   visible: boolean;
   onClose: () => void;
   date: string;
+  editingTask?: Task | null;
 }) {
   const { t } = useLocalization();
+  const { showAd } = useInterstitialAd();
   // ロケールに応じてメッセージを切り替えるため、スキーマはコンポーネント内で生成
   const TaskSchema = z.object({
     content: z
@@ -48,6 +53,7 @@ export default function TaskFormDialog({
     handleSubmit,
     reset,
     clearErrors,
+    setValue,
     formState: { errors, isSubmitting, isValid },
   } = useForm<TaskFormValues>({
     resolver: zodResolver(TaskSchema),
@@ -55,23 +61,61 @@ export default function TaskFormDialog({
     mode: "onChange",
   });
 
-  // ダイアログが閉じられた時にフォームをリセット
+  // ダイアログが開かれた時に編集データを設定
   useEffect(() => {
-    if (!visible) {
+    if (visible && editingTask && editingTask.id) {
+      // 即座に値を設定
+      setValue("content", editingTask.content);
+      setValue("summary", editingTask.summary || "");
+    } else if (!visible) {
+      // ダイアログが閉じられた時にリセット
       reset();
       clearErrors();
     }
-  }, [visible, reset, clearErrors]);
+  }, [
+    visible,
+    editingTask?.id,
+    editingTask?.content,
+    editingTask?.summary,
+    setValue,
+    reset,
+    clearErrors,
+  ]);
 
   const onSubmit = async (values: TaskFormValues) => {
     try {
-      console.log("CREATE_TASK", { date, ...values });
-      await db.insert(taskTable).values({ date, ...values });
+      if (editingTask && editingTask.id) {
+        // 編集モード
+        console.log("UPDATE_TASK", { id: editingTask.id, ...values });
+        await db
+          .update(taskTable)
+          .set({
+            content: values.content,
+            summary: values.summary,
+            updatedAt: new Date().toISOString(),
+          })
+          .where(eq(taskTable.id, editingTask.id));
+      } else {
+        // 新規作成モード
+        console.log("CREATE_TASK", { date, ...values });
+        await db.insert(taskTable).values({ date, ...values });
+      }
+
       // フォームをリセット
       reset();
       onClose();
+
+      // タスク登録・編集後にインタースティシャル広告を表示
+      setTimeout(() => {
+        showAd();
+      }, 1000); // ダイアログが閉じるのを待ってから広告を表示
     } catch (error) {
-      console.error("CREATE_TASK_FAILED", error);
+      console.error(
+        editingTask && editingTask.id
+          ? "UPDATE_TASK_FAILED"
+          : "CREATE_TASK_FAILED",
+        error
+      );
     }
   };
 
@@ -99,7 +143,9 @@ export default function TaskFormDialog({
             {/* Header */}
             <View className="flex-row items-center justify-between mb-2">
               <Text className="text-lg font-bold text-gray-900">
-                {t("tasks.addTask")}
+                {editingTask && editingTask.id
+                  ? t("tasks.editTask")
+                  : t("tasks.addTask")}
               </Text>
               <TouchableOpacity onPress={onClose} className="p-2">
                 <Ionicons name="close" size={22} color="#111827" />
@@ -193,25 +239,39 @@ export default function TaskFormDialog({
             <View className="flex-row justify-end gap-3 mt-2">
               <TouchableOpacity
                 onPress={onClose}
-                className="h-11 px-4 rounded-xl bg-gray-100 items-center justify-center"
+                className="h-11 px-4 rounded-xl bg-gray-100 items-center justify-center flex-row"
               >
-                <Text className="text-gray-800 font-semibold">
+                <Ionicons name="close-outline" size={18} color="#374151" />
+                <Text className="text-gray-800 font-semibold ml-2">
                   {t("common.cancel")}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleSubmit(onSubmit)}
                 disabled={isSubmitting || !isValid}
-                className={`w-20 h-11 px-4 rounded-xl items-center justify-center ${
+                className={`h-11 px-4 rounded-xl items-center justify-center flex-row ${
                   isSubmitting || !isValid ? "bg-blue-300" : "bg-blue-600"
                 }`}
               >
                 {isSubmitting ? (
                   <ActivityIndicator size="small" color="white" />
                 ) : (
-                  <Text className="text-white font-bold">
-                    {t("common.save")}
-                  </Text>
+                  <>
+                    <Ionicons
+                      name={
+                        editingTask && editingTask.id
+                          ? "checkmark-outline"
+                          : "add-outline"
+                      }
+                      size={18}
+                      color="white"
+                    />
+                    <Text className="text-white font-bold ml-2">
+                      {editingTask && editingTask.id
+                        ? t("common.update")
+                        : t("common.save")}
+                    </Text>
+                  </>
                 )}
               </TouchableOpacity>
             </View>

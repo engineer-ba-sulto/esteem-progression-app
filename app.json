@@ -2,13 +2,14 @@
   "expo": {
     "name": "esteem-progression-app",
     "slug": "esteem-progression-app",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "esteemprogressionapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "buildNumber": "2",
       "supportsTablet": true,
       "bundleIdentifier": "com.engineer-ba-sulto.esteem-progression-app",
       "infoPlist": {
@@ -20,7 +21,9 @@
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.engineerbasulto.esteemprogressionapp",
+      "versionCode": 2
     },
     "web": {
       "bundler": "metro",
@@ -39,7 +42,16 @@
         }
       ],
       "expo-sqlite",
-      "expo-localization"
+      "expo-localization",
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "iosAppId": "ca-app-pub-2054344840815103~8467007677",
+          "userTrackingUsageDescription": "この識別子は、あなたにパーソナライズされた広告を配信するために使用されます。",
+          "delayAppMeasurementInit": true
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
