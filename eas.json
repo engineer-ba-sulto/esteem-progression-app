@@ -12,8 +12,7 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": false,
-      "version": "1.0.1"
+      "autoIncrement": false
     }
   },
   "submit": {
