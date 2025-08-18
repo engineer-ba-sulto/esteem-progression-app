@@ -1,5 +1,100 @@
 import * as Localization from "expo-localization";
 import { I18n } from "i18n-js";
+import { LocaleConfig } from "react-native-calendars";
+
+// カレンダーのロケール設定
+export const initializeCalendarLocale = (locale: string) => {
+  const monthNames =
+    locale === "en"
+      ? [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
+        ]
+      : [
+          "1月",
+          "2月",
+          "3月",
+          "4月",
+          "5月",
+          "6月",
+          "7月",
+          "8月",
+          "9月",
+          "10月",
+          "11月",
+          "12月",
+        ];
+
+  const monthNamesShort =
+    locale === "en"
+      ? [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
+        ]
+      : [
+          "1月",
+          "2月",
+          "3月",
+          "4月",
+          "5月",
+          "6月",
+          "7月",
+          "8月",
+          "9月",
+          "10月",
+          "11月",
+          "12月",
+        ];
+
+  const dayNames =
+    locale === "en"
+      ? [
+          "Sunday",
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+        ]
+      : ["日曜日", "月曜日", "火曜日", "水曜日", "木曜日", "金曜日", "土曜日"];
+
+  const dayNamesShort =
+    locale === "en"
+      ? ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+      : ["日", "月", "火", "水", "木", "金", "土"];
+
+  LocaleConfig.locales[locale] = {
+    monthNames,
+    monthNamesShort,
+    dayNames,
+    dayNamesShort,
+    today: locale === "en" ? "Today" : "今日",
+  };
+
+  LocaleConfig.defaultLocale = locale;
+  // console.log(`カレンダーのロケールが初期化されました: ${locale}`);
+};
 
 // 日本語の翻訳
 const ja = {
@@ -144,7 +239,8 @@ const ja = {
     summaryLabel: "メモ（任意）",
     summaryPlaceholder: "補足や目標など",
     deleteConfirmTitle: "タスクを削除",
-    deleteConfirmMessage: "このタスクを削除しますか？この操作は取り消せません。",
+    deleteConfirmMessage:
+      "このタスクを削除しますか？この操作は取り消せません。",
     deleteError: "タスクの削除に失敗しました",
     status: {
       completed: "完了",
@@ -386,7 +482,8 @@ const en = {
     summaryLabel: "Memo (optional)",
     summaryPlaceholder: "Additional notes or goals",
     deleteConfirmTitle: "Delete Task",
-    deleteConfirmMessage: "Are you sure you want to delete this task? This action cannot be undone.",
+    deleteConfirmMessage:
+      "Are you sure you want to delete this task? This action cannot be undone.",
     deleteError: "Failed to delete task",
     status: {
       completed: "Completed",
