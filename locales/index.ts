@@ -293,6 +293,7 @@ const ja = {
   },
   notifications: {
     title: "通知",
+    taskReminder: "タスクリマインダー",
     enableNotifications: "通知を有効にする",
     enableNotificationsDescription:
       "毎日のタスク確認をリマインダーで通知します",
@@ -536,6 +537,7 @@ const en = {
   },
   notifications: {
     title: "Notifications",
+    taskReminder: "Task Reminder",
     enableNotifications: "Enable Notifications",
     enableNotificationsDescription: "Receive daily task reminders",
     notificationTime: "Notification Time",

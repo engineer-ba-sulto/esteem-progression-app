@@ -1,3 +1,4 @@
+import i18n from "@/locales";
 import * as Notifications from "expo-notifications";
 
 /**
@@ -46,7 +47,7 @@ export const scheduleDailyNotification = async (
 
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: "タスクリマインダー",
+        title: i18n.t("notifications.taskReminder"),
         body: message || "今日のタスクは決まりましたか？",
         data: { type: "daily_reminder" },
       },
