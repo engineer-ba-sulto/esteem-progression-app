@@ -3,6 +3,7 @@ import i18n, { initializeCalendarLocale } from "@/locales";
 import { LocalizationProvider } from "@/utils/localization-context";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import * as Localization from "expo-localization";
+import * as Notifications from "expo-notifications";
 import { Stack } from "expo-router";
 import { SQLiteProvider } from "expo-sqlite";
 import { Suspense, useEffect } from "react";
@@ -13,6 +14,17 @@ import "../global.css";
 
 export default function RootLayout() {
   useEffect(() => {
+    // 通知の基本設定
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+        shouldShowBanner: true,
+        shouldShowList: true,
+      }),
+    });
+
     // ローカライゼーションの初期化
     const deviceLocale = Localization.getLocales()[0]?.languageCode || "ja";
     i18n.locale = deviceLocale;
