@@ -2,14 +2,14 @@
   "expo": {
     "name": "esteem-progression-app",
     "slug": "esteem-progression-app",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "esteemprogressionapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "buildNumber": "2",
+      "buildNumber": "1",
       "supportsTablet": true,
       "bundleIdentifier": "com.engineer-ba-sulto.esteem-progression-app",
       "infoPlist": {
@@ -23,7 +23,7 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.engineerbasulto.esteemprogressionapp",
-      "versionCode": 2
+      "versionCode": 1
     },
     "web": {
       "bundler": "metro",
