@@ -51,9 +51,9 @@ export const scheduleDailyNotification = async (
         data: { type: "daily_reminder" },
       },
       trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DAILY,
         hour,
         minute,
-        repeats: true,
       },
     });
 

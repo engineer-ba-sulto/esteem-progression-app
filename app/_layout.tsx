@@ -17,7 +17,6 @@ export default function RootLayout() {
     // 通知の基本設定
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
-        shouldShowAlert: true,
         shouldPlaySound: true,
         shouldSetBadge: false,
         shouldShowBanner: true,

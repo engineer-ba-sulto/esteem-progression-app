@@ -21,8 +21,6 @@ export default function NotificationsScreen() {
   const {
     settings,
     isLoading,
-    error,
-    updateSettings,
     updateEnabled,
     updateTime,
     updateMessage,
@@ -34,7 +32,6 @@ export default function NotificationsScreen() {
     useState("今日のタスクは決まりましたか？");
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedTime, setSelectedTime] = useState(new Date());
-  const [isSaving, setIsSaving] = useState(false);
 
   // 保存された設定を読み込んで状態を更新
   useEffect(() => {
