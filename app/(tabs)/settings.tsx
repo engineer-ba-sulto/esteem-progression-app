@@ -69,12 +69,6 @@ export default function SettingsScreen() {
     const newLocale = availableLocales[nextIndex];
 
     changeLocale(newLocale);
-
-    Alert.alert(
-      t("settings.languageChanged"),
-      `${t("settings.currentLanguage")}: ${newLocale === "ja" ? "日本語" : "English"}`,
-      [{ text: t("common.confirm"), style: "default" }]
-    );
   };
 
   const handleDataDeletionPress = () => {
@@ -147,7 +141,7 @@ export default function SettingsScreen() {
           </Text>
           <SettingCard
             icon={<LanguageIcon />}
-            label={`${t("settings.language")} (${locale === "ja" ? "日本語" : "English"})`}
+            label={`${t("settings.language")} (${locale === "ja" ? "日本語" : "English"} → ${locale === "ja" ? "English" : "日本語"})`}
             onPress={handleLanguagePress}
           />
           <SettingCard

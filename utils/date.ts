@@ -22,24 +22,24 @@ const getLocale = () => {
   return i18n.locale === "ja" ? ja : enUS;
 };
 
-// 日本時間でYYYY-MM-DD形式の日付を取得する関数
-export const getJapaneseISODate = (date: Date): string => {
-  return format(date, "yyyy-MM-dd", { locale: getLocale() });
+// デバイスのローカル時間でYYYY-MM-DD形式の日付を取得する関数
+export const getLocalISODate = (date: Date): string => {
+  return format(date, "yyyy-MM-dd");
 };
 
-// 現在の日付を日本時間でYYYY-MM-DD形式で取得
+// 現在の日付をデバイスのローカル時間でYYYY-MM-DD形式で取得
 export const getTodayISODate = (): string => {
-  return getJapaneseISODate(new Date());
+  return getLocalISODate(new Date());
 };
 
-// 昨日の日付を日本時間でYYYY-MM-DD形式で取得
+// 昨日の日付をデバイスのローカル時間でYYYY-MM-DD形式で取得
 export const getYesterdayISODate = (): string => {
-  return getJapaneseISODate(subDays(new Date(), 1));
+  return getLocalISODate(subDays(new Date(), 1));
 };
 
-// 明日の日付を日本時間でYYYY-MM-DD形式で取得
+// 明日の日付をデバイスのローカル時間でYYYY-MM-DD形式で取得
 export const getTomorrowISODate = (): string => {
-  return getJapaneseISODate(addDays(new Date(), 1));
+  return getLocalISODate(addDays(new Date(), 1));
 };
 
 // 指定された日付が今日、昨日、明日のどれかを判定
@@ -97,8 +97,8 @@ export const getMonthRange = (date: Date = new Date()) => {
   const start = startOfMonth(date);
   const end = endOfMonth(date);
   return {
-    start: getJapaneseISODate(start),
-    end: getJapaneseISODate(end),
+    start: getLocalISODate(start),
+    end: getLocalISODate(end),
   };
 };
 
@@ -132,7 +132,7 @@ export const getCalendarDateInfo = (date: Date) => {
     month: getMonth(date) + 1, // date-fnsは0ベースなので+1
     day: getDate(date),
     dayOfWeek: getDay(date),
-    dateString: getJapaneseISODate(date),
+    dateString: getLocalISODate(date),
   };
 };
 
@@ -148,7 +148,7 @@ export const getDaysDifference = (date1: string, date2: string): number => {
 export const addDaysToDate = (dateString: string, days: number): string => {
   const date = parseDateString(dateString);
   const newDate = addDays(date, days);
-  return getJapaneseISODate(newDate);
+  return getLocalISODate(newDate);
 };
 
 // 日付を指定日数分戻す
@@ -169,3 +169,6 @@ export const isConsecutiveDay = (date1: string, date2: string): boolean => {
   const diff = getDaysDifference(date1, date2);
   return diff === 1;
 };
+
+// 後方互換性のため、古い関数名も残す
+export const getJapaneseISODate = getLocalISODate;

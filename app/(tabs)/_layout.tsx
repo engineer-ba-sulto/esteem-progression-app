@@ -49,7 +49,6 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings" size={size} color={color} />
           ),
-          href: null, // タブを非表示にする
         }}
       />
     </Tabs>
