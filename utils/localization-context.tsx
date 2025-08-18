@@ -21,9 +21,13 @@ export const LocalizationProvider: React.FC<{ children: React.ReactNode }> = ({
     i18n.locale = deviceLocale;
   }, []);
 
-  const changeLocale = (newLocale: string) => {
+  const changeLocale = async (newLocale: string) => {
     setLocale(newLocale);
     i18n.locale = newLocale;
+
+    // カレンダーのロケールを更新
+    updateCalendarLocale(newLocale);
+
     // 言語変更時にコンポーネントを再レンダリングするためのトリガー
     setUpdateTrigger((prev) => prev + 1);
   };
