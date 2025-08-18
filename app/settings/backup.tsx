@@ -1,23 +1,54 @@
 import TabHeader from "@/components/screen-header";
+import {
+  createBackup,
+  getBackupHistory,
+  restoreBackup,
+} from "@/utils/backup-restore";
 import { formatDate } from "@/utils/date";
 import { useLocalization } from "@/utils/localization-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useState } from "react";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function BackupScreen() {
   const { t } = useLocalization();
-  const [lastBackupDate, setLastBackupDate] = useState<string | null>(
-    "2024/01/15 10:30"
-  );
+  const [lastBackupDate, setLastBackupDate] = useState<string | null>(null);
+  const [isBackingUp, setIsBackingUp] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
+
+  // バックアップ履歴を取得して最新のバックアップ日時を設定
+  useEffect(() => {
+    const loadBackupHistory = async () => {
+      try {
+        const result = await getBackupHistory();
+        if (result.success && result.backups && result.backups.length > 0) {
+          const latestBackup = result.backups[0];
+          setLastBackupDate(
+            formatDate(latestBackup.modified, "yyyy/MM/dd HH:mm")
+          );
+        }
+      } catch (error) {
+        console.error("Failed to load backup history:", error);
+      }
+    };
+
+    loadBackupHistory();
+  }, []);
 
   const handleBack = () => {
     router.back();
   };
 
-  const handleCreateBackup = () => {
+  const handleCreateBackup = async () => {
     Alert.alert(
       t("backup.createBackupAlert"),
       t("backup.createBackupMessage"),
@@ -28,21 +59,39 @@ export default function BackupScreen() {
         },
         {
           text: t("backup.createBackupButton"),
-          onPress: () => {
-            // ここでバックアップ処理を実装
-            console.log("バックアップを作成しました");
-            setLastBackupDate(formatDate(new Date(), "yyyy/MM/dd HH:mm"));
-            Alert.alert(
-              t("backup.backupCompleted"),
-              t("backup.backupCreatedMessage")
-            );
+          onPress: async () => {
+            setIsBackingUp(true);
+            try {
+              const result = await createBackup();
+              if (result.success) {
+                setLastBackupDate(formatDate(new Date(), "yyyy/MM/dd HH:mm"));
+                Alert.alert(
+                  t("backup.backupCompleted"),
+                  t("backup.backupCreatedMessage")
+                );
+              } else {
+                Alert.alert(
+                  "バックアップエラー",
+                  result.error || "バックアップの作成に失敗しました",
+                  [{ text: "OK" }]
+                );
+              }
+            } catch (error) {
+              Alert.alert(
+                "バックアップエラー",
+                "バックアップの作成中にエラーが発生しました",
+                [{ text: "OK" }]
+              );
+            } finally {
+              setIsBackingUp(false);
+            }
           },
         },
       ]
     );
   };
 
-  const handleRestoreBackup = () => {
+  const handleRestoreBackup = async () => {
     Alert.alert(
       t("backup.restoreBackupAlert"),
       t("backup.restoreBackupMessage"),
@@ -53,13 +102,40 @@ export default function BackupScreen() {
         },
         {
           text: t("backup.selectFileButton"),
-          onPress: () => {
-            // ここでファイル選択と復元処理を実装
-            console.log("バックアップを復元しました");
-            Alert.alert(
-              t("backup.backupCompleted"),
-              t("backup.backupRestoredMessage")
-            );
+          onPress: async () => {
+            setIsRestoring(true);
+            try {
+              const result = await restoreBackup();
+              if (result.success) {
+                Alert.alert(
+                  t("backup.backupCompleted"),
+                  t("backup.backupRestoredMessage"),
+                  [
+                    {
+                      text: "OK",
+                      onPress: () => {
+                        // 復元後、アプリを再起動するか、データを再読み込みする
+                        // ここでは単純にアラートを表示
+                      },
+                    },
+                  ]
+                );
+              } else {
+                Alert.alert(
+                  "復元エラー",
+                  result.error || "バックアップの復元に失敗しました",
+                  [{ text: "OK" }]
+                );
+              }
+            } catch (error) {
+              Alert.alert(
+                "復元エラー",
+                "バックアップの復元中にエラーが発生しました",
+                [{ text: "OK" }]
+              );
+            } finally {
+              setIsRestoring(false);
+            }
           },
         },
       ]
@@ -101,11 +177,21 @@ export default function BackupScreen() {
             </View>
             <TouchableOpacity
               onPress={handleCreateBackup}
-              className="bg-blue-500 rounded-lg py-4 px-6"
+              disabled={isBackingUp}
+              className={`rounded-lg py-4 px-6 ${
+                isBackingUp ? "bg-blue-300" : "bg-blue-500"
+              }`}
             >
-              <Text className="text-white text-center font-semibold text-lg">
-                {t("backup.createBackupButton")}
-              </Text>
+              <View className="flex-row items-center justify-center">
+                {isBackingUp && (
+                  <ActivityIndicator color="white" className="mr-2" />
+                )}
+                <Text className="text-white text-center font-semibold text-lg">
+                  {isBackingUp
+                    ? "バックアップ中..."
+                    : t("backup.createBackupButton")}
+                </Text>
+              </View>
             </TouchableOpacity>
           </View>
 
@@ -133,25 +219,31 @@ export default function BackupScreen() {
             </Text>
             <TouchableOpacity
               onPress={handleRestoreBackup}
-              className="bg-green-500 rounded-lg py-4 px-6"
+              disabled={isRestoring}
+              className={`rounded-lg py-4 px-6 ${
+                isRestoring ? "bg-green-300" : "bg-green-500"
+              }`}
             >
-              <Text className="text-white text-center font-semibold text-lg">
-                {t("backup.selectFileButton")}
-              </Text>
+              <View className="flex-row items-center justify-center">
+                {isRestoring && (
+                  <ActivityIndicator color="white" className="mr-2" />
+                )}
+                <Text className="text-white text-center font-semibold text-lg">
+                  {isRestoring ? "復元中..." : t("backup.selectFileButton")}
+                </Text>
+              </View>
             </TouchableOpacity>
           </View>
 
           {/* 最終バックアップ情報 */}
-          {lastBackupDate && (
-            <View className="bg-white rounded-lg border border-gray-200 p-4">
-              <Text className="text-sm font-medium text-gray-600 mb-1">
-                {t("backup.lastBackup")}
-              </Text>
-              <Text className="text-lg font-semibold text-gray-800">
-                {lastBackupDate}
-              </Text>
-            </View>
-          )}
+          <View className="bg-white rounded-lg border border-gray-200 p-4">
+            <Text className="text-sm font-medium text-gray-600 mb-1">
+              {t("backup.lastBackup")}
+            </Text>
+            <Text className="text-lg font-semibold text-gray-800">
+              {lastBackupDate || "バックアップがありません"}
+            </Text>
+          </View>
         </View>
 
         {/* 注意事項 */}
