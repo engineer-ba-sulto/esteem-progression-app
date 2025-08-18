@@ -6,6 +6,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   ScrollView,
   Switch,
   Text,
@@ -103,7 +104,16 @@ export default function NotificationsScreen() {
                   onValueChange={async (value) => {
                     setIsNotificationEnabled(value);
                     // 即座に保存
-                    await updateEnabled(value);
+                    const result = await updateEnabled(value);
+
+                    if (!result.success) {
+                      // エラーが発生した場合は状態を元に戻す
+                      setIsNotificationEnabled(!value);
+                      Alert.alert(
+                        "エラー",
+                        result.error || "通知設定の更新に失敗しました"
+                      );
+                    }
                   }}
                   trackColor={{ false: "#e5e7eb", true: "#3b82f6" }}
                   thumbColor={isNotificationEnabled ? "#ffffff" : "#f3f4f6"}

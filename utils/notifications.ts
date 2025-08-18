@@ -27,3 +27,62 @@ export const checkNotificationPermissions = async (): Promise<boolean> => {
     return false;
   }
 };
+
+/**
+ * 毎日の繰り返し通知をスケジュールする
+ * @param time 通知時刻（"HH:mm" format）
+ * @param message 通知メッセージ
+ * @returns スケジュール結果
+ */
+export const scheduleDailyNotification = async (
+  time: string,
+  message: string
+): Promise<{ success: boolean; error?: string }> => {
+  try {
+    // 既存の通知をキャンセル
+    await Notifications.cancelAllScheduledNotificationsAsync();
+
+    const [hour, minute] = time.split(":").map(Number);
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "タスクリマインダー",
+        body: message || "今日のタスクは決まりましたか？",
+        data: { type: "daily_reminder" },
+      },
+      trigger: {
+        hour,
+        minute,
+        repeats: true,
+      },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to schedule notification:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+};
+
+/**
+ * すべての通知をキャンセルする
+ * @returns キャンセル結果
+ */
+export const cancelNotifications = async (): Promise<{
+  success: boolean;
+  error?: string;
+}> => {
+  try {
+    await Notifications.cancelAllScheduledNotificationsAsync();
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to cancel notifications:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+};
