@@ -1,13 +1,7 @@
-import { db } from "@/db/client";
-import { Task, taskTable } from "@/db/schema";
-import {
-  getCalendarDateInfo,
-  getMonthRange,
-  getTodayISODate,
-} from "@/utils/date";
+import { Task } from "@/db/schema";
+import { useTasks } from "@/hooks/use-tasks";
+import { getCalendarDateInfo, getTodayISODate } from "@/utils/date";
 import { useLocalization } from "@/utils/localization-context";
-import { and, gte, lte } from "drizzle-orm";
-import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import React, { useEffect, useMemo, useState } from "react";
 import { Text, View } from "react-native";
 import { Calendar } from "react-native-calendars";
@@ -15,7 +9,6 @@ import TaskFormDialog from "./task-form-dialog";
 import TaskViewDialog from "./task-view-dialog";
 
 export default function CalendarView() {
-  const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>(getTodayISODate());
   const [showTaskViewDialog, setShowTaskViewDialog] = useState(false);
   const [showTaskFormDialog, setShowTaskFormDialog] = useState(false);
@@ -23,48 +16,13 @@ export default function CalendarView() {
 
   const { t, locale, updateCalendarLocale } = useLocalization();
 
-  // 今日と当月範囲（ローカルタイムで算出してYYYY-MM-DD化）
-  const { todayYMD, monthStart, monthEnd } = useMemo(() => {
-    const today = getTodayISODate();
-    const { start, end } = getMonthRange();
-    return { todayYMD: today, monthStart: start, monthEnd: end };
+  // 共通フックでタスクデータを取得
+  const { tasks } = useTasks();
+
+  // 今日の日付を取得
+  const todayYMD = useMemo(() => {
+    return getTodayISODate();
   }, []);
-
-  // 当月のタスクのみをLive購読
-  const { data: liveTasks } = useLiveQuery(
-    db
-      .select()
-      .from(taskTable)
-      .where(
-        and(gte(taskTable.date, monthStart), lte(taskTable.date, monthEnd))
-      )
-  );
-
-  // 初回/範囲変更時のフェッチ（エラーログ用の保険）
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const list = await db
-          .select()
-          .from(taskTable)
-          .where(
-            and(gte(taskTable.date, monthStart), lte(taskTable.date, monthEnd))
-          );
-        if (mounted) setTasks(list as Task[]);
-      } catch (e) {
-        console.error("[CalendarView] DB fetch error:", e);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, [monthStart, monthEnd]);
-
-  // Liveデータ反映
-  useEffect(() => {
-    if (liveTasks) setTasks(liveTasks as Task[]);
-  }, [liveTasks]);
 
   // カレンダーのロケール設定を更新
   useEffect(() => {

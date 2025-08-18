@@ -5,14 +5,13 @@ import CalendarView from "@/components/calendar-view";
 import TabHeader from "@/components/screen-header";
 import StatCard from "@/components/stat-card";
 import { useRecords } from "@/constants/record";
-import { db, schema } from "@/db/client";
+import { useTasks } from "@/hooks/use-tasks";
 import { useLocalization } from "@/utils/localization-context";
 import {
   calculateBestStreak,
   calculateCurrentStreak,
   calculateTotalCompleted,
 } from "@/utils/statistics";
-import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import React, { useMemo } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -20,24 +19,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function RecordScreen() {
   const { t } = useLocalization();
 
-  // DBからタスクデータを取得（Live Query）
-  const { data: tasks } = useLiveQuery(db.select().from(schema.taskTable));
+  // 共通フックでタスクデータを取得
+  const { tasks } = useTasks();
 
   // 統計の計算（メモ化でパフォーマンス最適化）
-  const currentStreak = useMemo(
-    () => calculateCurrentStreak(tasks || []),
-    [tasks]
-  );
-
-  const bestStreak = useMemo(() => calculateBestStreak(tasks || []), [tasks]);
-
-  const totalCompleted = useMemo(
-    () => calculateTotalCompleted(tasks || []),
-    [tasks]
-  );
+  const currentStreak = useMemo(() => calculateCurrentStreak(tasks), [tasks]);
+  const bestStreak = useMemo(() => calculateBestStreak(tasks), [tasks]);
+  const totalCompleted = useMemo(() => calculateTotalCompleted(tasks), [tasks]);
 
   // 実績データの取得（動的判定）
-  const records = useRecords(tasks || []);
+  const records = useRecords(tasks);
 
   return (
     <SafeAreaView className="flex flex-col h-full bg-blue-50" edges={["top"]}>

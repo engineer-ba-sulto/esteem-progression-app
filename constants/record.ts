@@ -10,7 +10,7 @@ export const useRecords = (tasks: any[] = []) => {
   // 実績の動的判定（メモ化でパフォーマンス最適化）
   const achievements = useMemo(() => checkAchievements(tasks), [tasks]);
 
-  // 実績データの生成
+  // 実績データの生成（達成しやすい順番）
   const records = useMemo(
     () =>
       [
@@ -27,10 +27,10 @@ export const useRecords = (tasks: any[] = []) => {
           achieved: achievements["five-day-streak"],
         },
         {
-          id: "perfect-month",
-          icon: "🏆",
-          title: t("records.perfectMonth"),
-          achieved: achievements["perfect-month"],
+          id: "weekly-master",
+          icon: "🌟",
+          title: t("records.weeklyMaster"),
+          achieved: achievements["weekly-master"],
         },
         {
           id: "ten-day-streak",
@@ -45,10 +45,10 @@ export const useRecords = (tasks: any[] = []) => {
           achieved: achievements["hundred-tasks"],
         },
         {
-          id: "weekly-master",
-          icon: "🌟",
-          title: t("records.weeklyMaster"),
-          achieved: achievements["weekly-master"],
+          id: "perfect-month",
+          icon: "🏆",
+          title: t("records.perfectMonth"),
+          achieved: achievements["perfect-month"],
         },
       ] as Record[],
     [achievements, t]
