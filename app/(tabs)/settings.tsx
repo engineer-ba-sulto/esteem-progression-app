@@ -136,54 +136,60 @@ export default function SettingsScreen() {
       {/* Main Content */}
       <ScrollView className="flex-1 p-4">
         <View className="mt-6">
-          <Text className="px-4 text-sm font-semibold text-gray-500 mb-2">
-            {t("settings.general")}
-          </Text>
-          <SettingCard
-            icon={<LanguageIcon />}
-            label={`${t("settings.language")} (${locale === "ja" ? "日本語" : "English"} → ${locale === "ja" ? "English" : "日本語"})`}
-            onPress={handleLanguagePress}
-          />
-          <SettingCard
-            icon={<StarIcon />}
-            label={t("settings.subscription")}
-            onPress={() => router.push("/settings/subscription")}
-          />
-          <SettingCard
-            icon={<BellIcon />}
-            label={t("settings.notifications")}
-            onPress={() => router.push("/settings/notifications")}
-          />
-          <Text className="px-4 mt-6 text-sm font-semibold text-gray-500 mb-2">
-            {t("settings.dataManagement")}
-          </Text>
-          <SettingCard
-            icon={<ArrowUpTrayIcon />}
-            label={t("settings.backup")}
-            onPress={() => router.push("/settings/backup")}
-          />
-          <SettingCard
-            icon={<TrashIcon />}
-            label={`${t("settings.deleteData")}${isLoading ? " (処理中...)" : ""}`}
-            onPress={handleDataDeletionPress}
-            disabled={isLoading}
-          />
-          <Text className="px-4 mt-6 text-sm font-semibold text-gray-500 mb-2">
-            {t("settings.support")}
-          </Text>
-          <SettingCard
-            icon={<ShieldCheckIcon />}
-            label={t("settings.policy")}
-            onPress={() => router.push("/settings/policy")}
-          />
-          <SettingCard
-            icon={<QuestionMarkCircleIcon />}
-            label={t("settings.helpAndFeedback")}
-            onPress={handleHelpPress}
-          />
+          <View>
+            <Text className="px-4 text-sm font-semibold text-gray-500 mb-2">
+              {t("settings.general")}
+            </Text>
+            <SettingCard
+              icon={<LanguageIcon />}
+              label={`${t("settings.language")} (${locale === "ja" ? "日本語" : "English"} → ${locale === "ja" ? "English" : "日本語"})`}
+              onPress={handleLanguagePress}
+            />
+            {/* <SettingCard
+              icon={<StarIcon />}
+              label={t("settings.subscription")}
+              onPress={() => router.push("/settings/subscription")}
+            /> */}
+            <SettingCard
+              icon={<BellIcon />}
+              label={t("settings.notifications")}
+              onPress={() => router.push("/settings/notifications")}
+            />
+          </View>
+          {/* <View>
+            <Text className="px-4 mt-6 text-sm font-semibold text-gray-500 mb-2">
+              {t("settings.dataManagement")}
+            </Text>
+            <SettingCard
+              icon={<ArrowUpTrayIcon />}
+              label={t("settings.backup")}
+              onPress={() => router.push("/settings/backup")}
+            />
+            <SettingCard
+              icon={<TrashIcon />}
+              label={`${t("settings.deleteData")}${isLoading ? " (処理中...)" : ""}`}
+              onPress={handleDataDeletionPress}
+              disabled={isLoading}
+            />
+          </View> */}
+          {/* <View>
+            <Text className="px-4 mt-6 text-sm font-semibold text-gray-500 mb-2">
+              {t("settings.support")}
+            </Text>
+            <SettingCard
+              icon={<ShieldCheckIcon />}
+              label={t("settings.policy")}
+              onPress={() => router.push("/settings/policy")}
+            />
+            <SettingCard
+              icon={<QuestionMarkCircleIcon />}
+              label={t("settings.helpAndFeedback")}
+              onPress={handleHelpPress}
+            />
+          </View> */}
         </View>
 
-        <View className="text-center mt-8">
+        {/* <View className="text-center mt-8">
           <TouchableOpacity
             className="flex flex-row items-center justify-center w-full max-w-xs mx-auto py-3 px-6 bg-white rounded-lg border border-gray-200"
             onPress={handleLogoutPress}
@@ -193,7 +199,7 @@ export default function SettingsScreen() {
               {t("settings.logout")}
             </Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
       </ScrollView>
       <AdBanner />
     </SafeAreaView>
