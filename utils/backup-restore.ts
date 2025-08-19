@@ -35,7 +35,36 @@ export const createBackup = async (): Promise<{
     // ソースファイルの存在確認
     const sourceInfo = await FileSystem.getInfoAsync(sourcePath);
     if (!sourceInfo.exists) {
-      return { success: false, error: "Database file not found" };
+      return { success: false, error: "データベースファイルが見つかりません" };
+    }
+
+    // ファイルサイズチェック
+    if (
+      sourceInfo.exists &&
+      !sourceInfo.isDirectory &&
+      sourceInfo.size &&
+      sourceInfo.size > 100 * 1024 * 1024
+    ) {
+      return {
+        success: false,
+        error: "データベースファイルが大きすぎます（100MB制限）",
+      };
+    }
+
+    // ストレージ容量チェック（簡易版）
+    const storageInfo = await FileSystem.getInfoAsync(
+      FileSystem.documentDirectory || ""
+    );
+    if (
+      storageInfo.exists &&
+      !storageInfo.isDirectory &&
+      storageInfo.size &&
+      sourceInfo.exists &&
+      !sourceInfo.isDirectory &&
+      sourceInfo.size &&
+      storageInfo.size < sourceInfo.size * 2
+    ) {
+      return { success: false, error: "ストレージ容量が不足しています" };
     }
 
     // ファイルのコピー
@@ -44,13 +73,33 @@ export const createBackup = async (): Promise<{
       to: destinationPath,
     });
 
+    // コピー後の検証
+    const copiedInfo = await FileSystem.getInfoAsync(destinationPath);
+    if (!copiedInfo.exists) {
+      return {
+        success: false,
+        error: "バックアップファイルの作成に失敗しました",
+      };
+    }
+
     return { success: true, path: destinationPath };
   } catch (error) {
     console.error("Backup failed:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+    let errorMessage = "バックアップの作成に失敗しました";
+
+    if (error instanceof Error) {
+      if (error.message.includes("permission")) {
+        errorMessage = "ファイルアクセス権限がありません";
+      } else if (error.message.includes("storage")) {
+        errorMessage = "ストレージ容量が不足しています";
+      } else if (error.message.includes("not found")) {
+        errorMessage = "データベースファイルが見つかりません";
+      } else {
+        errorMessage = error.message;
+      }
+    }
+
+    return { success: false, error: errorMessage };
   }
 };
 
@@ -67,14 +116,25 @@ export const restoreBackup = async (): Promise<{
     });
 
     if (result.canceled || !result.assets?.[0]) {
-      return { success: false, error: "No file selected" };
+      return { success: false, error: "ファイルが選択されていません" };
     }
 
     const selectedFile = result.assets[0];
 
     // ファイルサイズチェック（例: 100MB制限）
     if (selectedFile.size && selectedFile.size > 100 * 1024 * 1024) {
-      return { success: false, error: "File too large" };
+      return {
+        success: false,
+        error: "ファイルサイズが大きすぎます（100MB制限）",
+      };
+    }
+
+    // ファイル形式チェック
+    if (!selectedFile.name?.endsWith(".db")) {
+      return {
+        success: false,
+        error: "無効なファイル形式です（.dbファイルのみ対応）",
+      };
     }
 
     // アプリを一時停止（DB操作中）
@@ -109,10 +169,23 @@ export const restoreBackup = async (): Promise<{
     }
   } catch (error) {
     console.error("Restore failed:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+    let errorMessage = "バックアップの復元に失敗しました";
+
+    if (error instanceof Error) {
+      if (error.message.includes("permission")) {
+        errorMessage = "ファイルアクセス権限がありません";
+      } else if (error.message.includes("storage")) {
+        errorMessage = "ストレージ容量が不足しています";
+      } else if (error.message.includes("not found")) {
+        errorMessage = "バックアップファイルが見つかりません";
+      } else if (error.message.includes("corrupt")) {
+        errorMessage = "バックアップファイルが破損しています";
+      } else {
+        errorMessage = error.message;
+      }
+    }
+
+    return { success: false, error: errorMessage };
   }
 };
 

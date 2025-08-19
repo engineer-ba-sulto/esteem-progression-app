@@ -24,17 +24,24 @@ export default function BackupScreen() {
   const [lastBackupDate, setLastBackupDate] = useState<string | null>(null);
   const [isBackingUp, setIsBackingUp] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
+  const [backupHistory, setBackupHistory] = useState<
+    { name: string; size: number; modified: Date }[]
+  >([]);
+  const [showHistory, setShowHistory] = useState(false);
 
   // バックアップ履歴を取得して最新のバックアップ日時を設定
   useEffect(() => {
     const loadBackupHistory = async () => {
       try {
         const result = await getBackupHistory();
-        if (result.success && result.backups && result.backups.length > 0) {
-          const latestBackup = result.backups[0];
-          setLastBackupDate(
-            formatDate(latestBackup.modified, "yyyy/MM/dd HH:mm")
-          );
+        if (result.success && result.backups) {
+          setBackupHistory(result.backups);
+          if (result.backups.length > 0) {
+            const latestBackup = result.backups[0];
+            setLastBackupDate(
+              formatDate(latestBackup.modified, "yyyy/MM/dd HH:mm")
+            );
+          }
         }
       } catch (error) {
         console.error("Failed to load backup history:", error);
@@ -237,12 +244,64 @@ export default function BackupScreen() {
 
           {/* 最終バックアップ情報 */}
           <View className="bg-white rounded-lg border border-gray-200 p-4">
-            <Text className="text-sm font-medium text-gray-600 mb-1">
-              {t("backup.lastBackup")}
-            </Text>
-            <Text className="text-lg font-semibold text-gray-800">
+            <View className="flex-row items-center justify-between mb-2">
+              <Text className="text-sm font-medium text-gray-600">
+                {t("backup.lastBackup")}
+              </Text>
+              {backupHistory.length > 0 && (
+                <TouchableOpacity
+                  onPress={() => setShowHistory(!showHistory)}
+                  className="flex-row items-center"
+                >
+                  <Text className="text-blue-500 text-sm mr-1">
+                    {showHistory ? "非表示" : "履歴表示"}
+                  </Text>
+                  <Ionicons
+                    name={showHistory ? "chevron-up" : "chevron-down"}
+                    size={16}
+                    color="#3b82f6"
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+            <Text className="text-lg font-semibold text-gray-800 mb-2">
               {lastBackupDate || "バックアップがありません"}
             </Text>
+            {backupHistory.length > 0 && (
+              <Text className="text-sm text-gray-500">
+                バックアップファイル数: {backupHistory.length}個
+              </Text>
+            )}
+
+            {/* バックアップ履歴 */}
+            {showHistory && backupHistory.length > 0 && (
+              <View className="mt-3 pt-3 border-t border-gray-200">
+                <Text className="text-sm font-medium text-gray-600 mb-2">
+                  バックアップ履歴
+                </Text>
+                {backupHistory.slice(0, 5).map((backup, index) => (
+                  <View
+                    key={index}
+                    className="flex-row items-center justify-between py-2"
+                  >
+                    <View className="flex-1">
+                      <Text className="text-sm text-gray-800 font-medium">
+                        {backup.name}
+                      </Text>
+                      <Text className="text-xs text-gray-500">
+                        {formatDate(backup.modified, "yyyy/MM/dd HH:mm")} •{" "}
+                        {(backup.size / 1024 / 1024).toFixed(2)}MB
+                      </Text>
+                    </View>
+                  </View>
+                ))}
+                {backupHistory.length > 5 && (
+                  <Text className="text-xs text-gray-400 text-center mt-2">
+                    他 {backupHistory.length - 5} 個のバックアップ
+                  </Text>
+                )}
+              </View>
+            )}
           </View>
         </View>
 
@@ -257,11 +316,20 @@ export default function BackupScreen() {
                 style={{ marginTop: 2, marginRight: 8 }}
               />
               <View className="flex-1">
-                <Text className="text-sm font-medium text-yellow-800 mb-1">
+                <Text className="text-sm font-medium text-yellow-800 mb-2">
                   {t("backup.notes")}
                 </Text>
+                <Text className="text-sm text-yellow-700 mb-2">
+                  • バックアップファイルは端末のローカルストレージに保存されます
+                </Text>
+                <Text className="text-sm text-yellow-700 mb-2">
+                  • 復元時は既存のデータが上書きされます
+                </Text>
+                <Text className="text-sm text-yellow-700 mb-2">
+                  • 復元後はアプリの再起動を推奨します
+                </Text>
                 <Text className="text-sm text-yellow-700">
-                  {t("backup.notesDescription")}
+                  • バックアップファイルは手動で管理してください
                 </Text>
               </View>
             </View>
