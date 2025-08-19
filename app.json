@@ -43,6 +43,7 @@
       ],
       "expo-sqlite",
       "expo-localization",
+      "expo-notifications",
       [
         "react-native-google-mobile-ads",
         {

@@ -27,8 +27,8 @@ export const useNotificationSettings = () => {
       const savedSettings = await loadNotificationSettings();
       setSettings(savedSettings);
 
-      // 保存された設定がある場合、通知が有効なら実際の通知をスケジュール
-      if (savedSettings && savedSettings.enabled) {
+      // 通知が有効なら実際の通知をスケジュール
+      if (savedSettings.enabled) {
         const hasPermission = await requestNotificationPermissions();
         if (hasPermission) {
           await scheduleDailyNotification(

@@ -18,13 +18,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function NotificationsScreen() {
   const { t } = useLocalization();
-  const {
-    settings,
-    isLoading,
-    updateEnabled,
-    updateTime,
-    updateMessage,
-  } = useNotificationSettings();
+  const { settings, isLoading, updateEnabled, updateTime, updateMessage } =
+    useNotificationSettings();
 
   const [isNotificationEnabled, setIsNotificationEnabled] = useState(false);
   const [notificationTime, setNotificationTime] = useState("20:00");
@@ -39,6 +34,12 @@ export default function NotificationsScreen() {
       setIsNotificationEnabled(settings.enabled);
       setNotificationTime(settings.time);
       setNotificationMessage(settings.message);
+      setSelectedTime(() => {
+        const [hours, minutes] = settings.time.split(":").map(Number);
+        const date = new Date();
+        date.setHours(hours, minutes, 0, 0);
+        return date;
+      });
     }
   }, [settings]);
 
