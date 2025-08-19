@@ -33,16 +33,38 @@ export const saveNotificationSettings = async (
 
 /**
  * 通知設定を読み込む
- * @returns 保存された通知設定、またはnull
+ * @returns 保存された通知設定、またはデフォルト設定
  */
 export const loadNotificationSettings =
-  async (): Promise<NotificationSettings | null> => {
+  async (): Promise<NotificationSettings> => {
     try {
       const data = await AsyncStorage.getItem(NOTIFICATION_SETTINGS_KEY);
-      return data ? JSON.parse(data) : null;
+      if (data) {
+        return JSON.parse(data);
+      }
+
+      // デフォルト設定を返す
+      const defaultSettings: NotificationSettings = {
+        enabled: false,
+        time: "20:00",
+        message: "今日のタスクは決まりましたか？",
+      };
+
+      // デフォルト設定を保存
+      await AsyncStorage.setItem(
+        NOTIFICATION_SETTINGS_KEY,
+        JSON.stringify(defaultSettings)
+      );
+
+      return defaultSettings;
     } catch (error) {
       console.error("Failed to load notification settings:", error);
-      return null;
+      // エラーの場合もデフォルト設定を返す
+      return {
+        enabled: false,
+        time: "20:00",
+        message: "今日のタスクは決まりましたか？",
+      };
     }
   };
 

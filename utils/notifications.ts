@@ -7,7 +7,9 @@ import * as Notifications from "expo-notifications";
  */
 export const requestNotificationPermissions = async (): Promise<boolean> => {
   try {
+    console.log("Requesting notification permissions...");
     const { status } = await Notifications.requestPermissionsAsync();
+    console.log("Notification permission status:", status);
     return status === "granted";
   } catch (error) {
     console.error("Failed to request notification permissions:", error);
@@ -40,12 +42,16 @@ export const scheduleDailyNotification = async (
   message: string
 ): Promise<{ success: boolean; error?: string }> => {
   try {
+    console.log("Scheduling daily notification for:", time);
+
     // 既存の通知をキャンセル
     await Notifications.cancelAllScheduledNotificationsAsync();
+    console.log("Cancelled existing notifications");
 
     const [hour, minute] = time.split(":").map(Number);
+    console.log("Notification time - Hour:", hour, "Minute:", minute);
 
-    await Notifications.scheduleNotificationAsync({
+    const notificationId = await Notifications.scheduleNotificationAsync({
       content: {
         title: i18n.t("notifications.taskReminder"),
         body: message || "今日のタスクは決まりましたか？",
@@ -58,6 +64,7 @@ export const scheduleDailyNotification = async (
       },
     });
 
+    console.log("Notification scheduled successfully with ID:", notificationId);
     return { success: true };
   } catch (error) {
     console.error("Failed to schedule notification:", error);
