@@ -18,7 +18,7 @@ import {
   View,
 } from "react-native";
 import { z } from "zod";
-import { useInterstitialAd } from "./interstitial-ad";
+import { useInterstitialAd } from "../hooks/use-interstitial-ad";
 
 export default function TaskFormDialog({
   visible,
