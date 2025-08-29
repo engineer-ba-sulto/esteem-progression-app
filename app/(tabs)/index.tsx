@@ -14,6 +14,10 @@ import {
   getYesterdayISODate,
   subtractDaysFromDate,
 } from "@/utils/date";
+import {
+  getDatabaseVersion,
+  subscribeDatabaseVersion,
+} from "@/utils/db-events";
 import { useLocalization } from "@/utils/localization-context";
 import { Ionicons } from "@expo/vector-icons";
 import { eq, inArray } from "drizzle-orm";
@@ -30,6 +34,13 @@ export default function HomeScreen() {
   });
   const { t } = useLocalization();
 
+  // DBの差し替え/削除直後に再購読させるためのversion
+  const [dbVersion, setDbVersion] = useState(getDatabaseVersion());
+  useEffect(() => {
+    const unsub = subscribeDatabaseVersion(setDbVersion);
+    return unsub;
+  }, []);
+
   // ローカライゼーションされたday-labelsを取得
   const dayLabels = useDayLabels();
 
@@ -43,7 +54,8 @@ export default function HomeScreen() {
     db
       .select()
       .from(taskTable)
-      .where(inArray(taskTable.date, [yesterdayStr, todayStr, tomorrowStr]))
+      .where(inArray(taskTable.date, [yesterdayStr, todayStr, tomorrowStr])),
+    [dbVersion]
   );
 
   useEffect(() => {
