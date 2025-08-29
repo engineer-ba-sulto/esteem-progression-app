@@ -1,8 +1,12 @@
-import { DATABASE } from "@/db/client";
+import { DATABASE } from "@/db/config";
+// bumpDatabaseVersion は resetDbConnection 内で呼ばれるため未使用
+import { closeDbConnectionSync, resetDbConnection } from "@/db/client";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system";
 
 const BACKUP_DIR = `${FileSystem.documentDirectory}Backups/`;
+const SQLITE_DIR = `${FileSystem.documentDirectory}SQLite/`;
 
 // バックアップディレクトリの作成
 const ensureBackupDirectory = async () => {
@@ -19,6 +23,26 @@ const generateBackupFileName = (): string => {
   return `esteem-backup-${timestamp}.db`;
 };
 
+// 最終バックアップ日時の保存キー
+const LAST_BACKUP_AT_KEY = "lastBackupAt";
+
+export const setLastBackupDate = async (date: Date) => {
+  try {
+    await AsyncStorage.setItem(LAST_BACKUP_AT_KEY, date.toISOString());
+  } catch {
+    // no-op
+  }
+};
+
+export const getLastBackupDate = async (): Promise<Date | null> => {
+  try {
+    const value = await AsyncStorage.getItem(LAST_BACKUP_AT_KEY);
+    return value ? new Date(value) : null;
+  } catch {
+    return null;
+  }
+};
+
 // DBファイルのバックアップ
 export const createBackup = async (): Promise<{
   success: boolean;
@@ -28,7 +52,7 @@ export const createBackup = async (): Promise<{
   try {
     await ensureBackupDirectory();
 
-    const sourcePath = `${FileSystem.documentDirectory}${DATABASE}`;
+    const sourcePath = `${SQLITE_DIR}${DATABASE}`;
     const fileName = generateBackupFileName();
     const destinationPath = `${BACKUP_DIR}${fileName}`;
 
@@ -81,6 +105,9 @@ export const createBackup = async (): Promise<{
         error: "バックアップファイルの作成に失敗しました",
       };
     }
+
+    // 最終バックアップ日時を保存
+    await setLastBackupDate(new Date());
 
     return { success: true, path: destinationPath };
   } catch (error) {
@@ -139,32 +166,46 @@ export const restoreBackup = async (): Promise<{
 
     // アプリを一時停止（DB操作中）
     const sourcePath = selectedFile.uri;
-    const destinationPath = `${FileSystem.documentDirectory}${DATABASE}`;
+    const destinationPath = `${SQLITE_DIR}${DATABASE}`;
 
     // 既存DBのバックアップ（安全のため）
-    const backupPath = `${FileSystem.documentDirectory}${DATABASE}.backup`;
-    await FileSystem.moveAsync({
-      from: destinationPath,
-      to: backupPath,
-    });
+    const backupPath = `${SQLITE_DIR}${DATABASE}.backup`;
+
+    // 既存DBがある場合のみバックアップを作成
+    const existingDbInfo = await FileSystem.getInfoAsync(destinationPath);
+    if (existingDbInfo.exists && !existingDbInfo.isDirectory) {
+      await FileSystem.moveAsync({
+        from: destinationPath,
+        to: backupPath,
+      });
+    }
 
     try {
-      // 新しいDBファイルのコピー
+      // 新しいDBファイルのコピー（事前に接続を閉じる）
+      closeDbConnectionSync();
       await FileSystem.copyAsync({
         from: sourcePath,
         to: destinationPath,
       });
 
-      // バックアップファイルの削除
-      await FileSystem.deleteAsync(backupPath);
+      // バックアップファイルの削除（存在する場合）
+      const backupInfo = await FileSystem.getInfoAsync(backupPath);
+      if (backupInfo.exists && !backupInfo.isDirectory) {
+        await FileSystem.deleteAsync(backupPath);
+      }
 
+      // 復元後に接続を張り直して購読を更新
+      resetDbConnection();
       return { success: true };
     } catch (error) {
       // 復元失敗時は元のDBを復旧
-      await FileSystem.moveAsync({
-        from: backupPath,
-        to: destinationPath,
-      });
+      const backupInfo = await FileSystem.getInfoAsync(backupPath);
+      if (backupInfo.exists && !backupInfo.isDirectory) {
+        await FileSystem.moveAsync({
+          from: backupPath,
+          to: destinationPath,
+        });
+      }
       throw error;
     }
   } catch (error) {
@@ -266,6 +307,58 @@ export const cleanupOldBackups = async (
     return { success: true, deletedCount };
   } catch (error) {
     console.error("Failed to cleanup old backups:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+};
+
+// 最新のバックアップから復元（ファイル選択なし）
+export const restoreLatestBackup = async (): Promise<{
+  success: boolean;
+  error?: string;
+}> => {
+  try {
+    await ensureBackupDirectory();
+    const history = await getBackupHistory();
+    if (!history.success || !history.backups || history.backups.length === 0) {
+      return { success: false, error: "バックアップが存在しません" };
+    }
+
+    const latest = history.backups[0];
+    const sourcePath = `${BACKUP_DIR}${latest.name}`;
+    const destinationPath = `${SQLITE_DIR}${DATABASE}`;
+    const backupPath = `${SQLITE_DIR}${DATABASE}.backup`;
+
+    const sourceInfo = await FileSystem.getInfoAsync(sourcePath);
+    if (!sourceInfo.exists || sourceInfo.isDirectory) {
+      return { success: false, error: "バックアップファイルが見つかりません" };
+    }
+
+    const existingDbInfo = await FileSystem.getInfoAsync(destinationPath);
+    if (existingDbInfo.exists && !existingDbInfo.isDirectory) {
+      await FileSystem.moveAsync({ from: destinationPath, to: backupPath });
+    }
+
+    try {
+      closeDbConnectionSync();
+      await FileSystem.copyAsync({ from: sourcePath, to: destinationPath });
+      const tmp = await FileSystem.getInfoAsync(backupPath);
+      if (tmp.exists && !tmp.isDirectory) {
+        await FileSystem.deleteAsync(backupPath);
+      }
+      resetDbConnection();
+      return { success: true };
+    } catch (error) {
+      const tmp = await FileSystem.getInfoAsync(backupPath);
+      if (tmp.exists && !tmp.isDirectory) {
+        await FileSystem.moveAsync({ from: backupPath, to: destinationPath });
+      }
+      throw error;
+    }
+  } catch (error) {
+    console.error("Restore latest failed:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
