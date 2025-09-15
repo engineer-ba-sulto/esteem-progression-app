@@ -1,19 +1,20 @@
 {
   "expo": {
-    "name": "esteem-progression-app",
+    "name": "1日1タスクアプリ",
     "slug": "esteem-progression-app",
-    "version": "1.0.3",
+    "version": "1.5.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "esteemprogressionapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "buildNumber": "1",
+      "buildNumber": "15",
       "supportsTablet": true,
       "bundleIdentifier": "com.engineer-ba-sulto.esteem-progression-app",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleDevelopmentRegion": "ja"
       }
     },
     "android": {
