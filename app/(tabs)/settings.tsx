@@ -1,12 +1,8 @@
 import AdBanner from "@/components/adbanner";
 import {
-  ArrowLeftOnRectangleIcon,
   ArrowUpTrayIcon,
   BellIcon,
   LanguageIcon,
-  QuestionMarkCircleIcon,
-  ShieldCheckIcon,
-  StarIcon,
   TrashIcon,
 } from "@/components/icons";
 import TabHeader from "@/components/screen-header";
@@ -15,7 +11,7 @@ import { deleteAllData, getDatabaseStats } from "@/db/client";
 import { useLocalization } from "@/utils/localization-context";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 interface DatabaseStats {
@@ -72,14 +68,9 @@ export default function SettingsScreen() {
   };
 
   const handleDataDeletionPress = () => {
-    // データ統計を表示
-    const statsMessage = databaseStats
-      ? `${t("settings.dataStats")}:\n${t("settings.totalTasks")}: ${databaseStats.totalTasks}\n${t("settings.completedTasks")}: ${databaseStats.completedTasks}\n${t("settings.pendingTasks")}: ${databaseStats.pendingTasks}`
-      : "";
-
     Alert.alert(
       t("settings.dataDeletionTitle"),
-      `${t("settings.dataDeletionWarning")}\n\n${t("settings.dataDeletionDetails")}\n\n${statsMessage}`,
+      t("settings.dataDeletionWarning"),
       [
         {
           text: t("settings.dataDeletionCancel"),
@@ -156,7 +147,7 @@ export default function SettingsScreen() {
               onPress={() => router.push("/settings/notifications")}
             />
           </View>
-          {/* <View>
+          <View>
             <Text className="px-4 mt-6 text-sm font-semibold text-gray-500 mb-2">
               {t("settings.dataManagement")}
             </Text>
@@ -171,7 +162,7 @@ export default function SettingsScreen() {
               onPress={handleDataDeletionPress}
               disabled={isLoading}
             />
-          </View> */}
+          </View>
           {/* <View>
             <Text className="px-4 mt-6 text-sm font-semibold text-gray-500 mb-2">
               {t("settings.support")}

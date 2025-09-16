@@ -1,12 +1,18 @@
-import { DATABASE, db } from "@/db/client";
+import { db } from "@/db/client";
+import { DATABASE } from "@/db/config";
+import { migrateDbFileName } from "@/db/migrateDbFilename";
 import i18n, { initializeCalendarLocale } from "@/locales";
+import {
+  getDatabaseVersion,
+  subscribeDatabaseVersion,
+} from "@/utils/db-events";
 import { LocalizationProvider } from "@/utils/localization-context";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import * as Localization from "expo-localization";
 import * as Notifications from "expo-notifications";
 import { Stack } from "expo-router";
 import { SQLiteProvider } from "expo-sqlite";
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import mobileAds, { MaxAdContentRating } from "react-native-google-mobile-ads";
 import migrations from "../drizzle/migrations";
@@ -66,6 +72,30 @@ export default function RootLayout() {
 }
 
 function MigrationGate() {
+  const [dbVersion, setDbVersion] = useState(getDatabaseVersion());
+  useEffect(() => {
+    const unsub = subscribeDatabaseVersion(setDbVersion);
+    return unsub;
+  }, []);
+  // DBを開く前に旧ファイル名から新ファイル名へワンタイム移行
+  useEffect(() => {
+    (async () => {
+      try {
+        await migrateDbFileName(
+          [
+            "test.db",
+            "esteem-prod.db",
+            "esteem-dev.db",
+            "esteem-progression.db.bak",
+          ],
+          DATABASE
+        );
+      } catch (e) {
+        console.warn("DB filename migration skipped:", e);
+      }
+    })();
+  }, []);
+
   const { success, error } = useMigrations(db, migrations);
 
   if (error) {
@@ -81,7 +111,7 @@ function MigrationGate() {
   }
 
   return (
-    <SQLiteProvider databaseName={DATABASE} useSuspense>
+    <SQLiteProvider key={dbVersion} databaseName={DATABASE} useSuspense>
       <LocalizationProvider>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(tabs)" options={{ title: "Home" }} />

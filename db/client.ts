@@ -1,21 +1,43 @@
+import { DATABASE } from "@/db/config";
 import * as schema from "@/db/schema";
 import i18n from "@/locales";
+import { bumpDatabaseVersion } from "@/utils/db-events";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { openDatabaseSync } from "expo-sqlite";
 
-export const DATABASE = process.env.EXPO_PUBLIC_DATABASE || "test.db";
-const expoDb = openDatabaseSync(DATABASE, {
+let expoDb = openDatabaseSync(DATABASE, {
   enableChangeListener: true,
 });
-export const db = drizzle(expoDb, { schema });
+export let db = drizzle(expoDb, { schema });
 export { schema };
+
+// DB接続の再初期化（復元後などに使用）
+export const resetDbConnection = () => {
+  expoDb = openDatabaseSync(DATABASE, { enableChangeListener: true });
+  db = drizzle(expoDb, { schema });
+  bumpDatabaseVersion();
+};
+
+// DB接続を同期的にクローズ（可能なら）
+export const closeDbConnectionSync = () => {
+  try {
+    // 型定義にないが環境によっては存在することがある
+    const anyDb: any = expoDb as any;
+    if (anyDb && typeof anyDb.closeSync === "function") {
+      anyDb.closeSync();
+    }
+  } catch {
+    // no-op
+  }
+};
 
 // データ削除機能
 export const deleteAllData = async () => {
   try {
     // すべてのタスクを削除
     await db.delete(schema.taskTable);
+    bumpDatabaseVersion();
     return { success: true };
   } catch (error) {
     console.error("データ削除エラー:", error);
