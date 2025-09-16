@@ -24,6 +24,14 @@ import { eq, inArray } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import React, { useCallback, useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
+import { PanGestureHandler } from "react-native-gesture-handler";
+import Animated, {
+  runOnJS,
+  useAnimatedGestureHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
@@ -33,6 +41,10 @@ export default function HomeScreen() {
     return getTodayISODate(); // YYYY-MM-DD形式で日本時間
   });
   const { t } = useLocalization();
+
+  // アニメーション用のSharedValue
+  const translateX = useSharedValue(0);
+  const opacity = useSharedValue(1);
 
   // DBの差し替え/削除直後に再購読させるためのversion
   const [dbVersion, setDbVersion] = useState(getDatabaseVersion());
@@ -125,27 +137,87 @@ export default function HomeScreen() {
     }
   };
 
-  const handlePrevDay = () => {
+  // アニメーション関数を共通化（反動なし）
+  const animateToNext = useCallback(() => {
+    translateX.value = withTiming(-300, { duration: 200 });
+    opacity.value = withTiming(0, { duration: 200 });
+  }, [translateX, opacity]);
+
+  const animateToPrev = useCallback(() => {
+    translateX.value = withTiming(300, { duration: 200 });
+    opacity.value = withTiming(0, { duration: 200 });
+  }, [translateX, opacity]);
+
+  const resetAnimation = useCallback(() => {
+    translateX.value = withTiming(0, { duration: 200 });
+    opacity.value = withTiming(1, { duration: 200 });
+  }, [translateX, opacity]);
+
+  const handlePrevDay = useCallback(() => {
     const newDate = subtractDaysFromDate(currentDate, 1);
 
     // 昨日より前には行けない
     if (newDate >= yesterdayStr) {
+      animateToPrev();
       setCurrentDate(newDate);
     }
-  };
+  }, [currentDate, yesterdayStr, animateToPrev]);
 
-  const handleNextDay = () => {
+  const handleNextDay = useCallback(() => {
     const newDate = addDaysToDate(currentDate, 1);
 
     // 明日より後には行けない
     if (newDate <= tomorrowStr) {
+      animateToNext();
       setCurrentDate(newDate);
     }
-  };
+  }, [currentDate, tomorrowStr, animateToNext]);
 
   // 前日・翌日ボタンの無効化条件
   const canGoPrev = currentDate > yesterdayStr;
   const canGoNext = currentDate < tomorrowStr;
+
+  // アニメーションスタイル
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: translateX.value }],
+      opacity: opacity.value,
+    };
+  });
+
+  // 日付変更時にアニメーションをリセット
+  useEffect(() => {
+    resetAnimation();
+  }, [currentDate, resetAnimation]);
+
+  // アニメーション付きスワイプジェスチャーハンドラー
+  const onSwipeGesture = useAnimatedGestureHandler({
+    onStart: () => {
+      // ジェスチャー開始時は何もしない
+    },
+    onActive: (event) => {
+      // スワイプ中はリアルタイムでアニメーション
+      translateX.value = event.translationX;
+      opacity.value = Math.max(0.3, 1 - Math.abs(event.translationX) / 200);
+    },
+    onEnd: (event) => {
+      const threshold = 50; // スワイプの最小距離
+      const { translationX } = event;
+
+      if (translationX > threshold && canGoPrev) {
+        // 右スワイプ（前日へ）- 反動なしのアニメーション
+        runOnJS(animateToPrev)();
+        runOnJS(handlePrevDay)();
+      } else if (translationX < -threshold && canGoNext) {
+        // 左スワイプ（翌日へ）- 反動なしのアニメーション
+        runOnJS(animateToNext)();
+        runOnJS(handleNextDay)();
+      } else {
+        // スワイプが不十分な場合は元の位置に戻る
+        runOnJS(resetAnimation)();
+      }
+    },
+  });
 
   // 今日以外の日付の場合は空の状態を表示（未使用のため削除）
   return (
@@ -172,53 +244,55 @@ export default function HomeScreen() {
       />
 
       {/* Main Content */}
-      <View className="flex-1 px-6">
-        {task && !task.isCompleted ? (
-          <View className="text-center flex-1 flex-col items-center justify-center">
-            <View className="w-full p-6 bg-white rounded-2xl border border-gray-200 shadow-md">
-              <Text className="text-2xl font-bold text-center">
-                {task.content}
-              </Text>
-              {task.summary && (
-                <Text className="text-gray-600 mt-2 text-center">
-                  {task.summary}
+      <PanGestureHandler onGestureEvent={onSwipeGesture}>
+        <Animated.View style={[animatedStyle]} className="flex-1 px-6">
+          {task && !task.isCompleted ? (
+            <View className="text-center flex-1 flex-col items-center justify-center">
+              <View className="w-full p-6 bg-white rounded-2xl border border-gray-200 shadow-md">
+                <Text className="text-2xl font-bold text-center">
+                  {task.content}
                 </Text>
-              )}
+                {task.summary && (
+                  <Text className="text-gray-600 mt-2 text-center">
+                    {task.summary}
+                  </Text>
+                )}
+              </View>
+              <TouchableOpacity
+                onPress={handleComplete}
+                className="mt-8 w-full max-w-xs py-4 bg-blue-600 rounded-xl shadow-lg"
+              >
+                <Text className="text-white font-bold text-center">
+                  {t("tasks.completed")}
+                </Text>
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity
-              onPress={handleComplete}
-              className="mt-8 w-full max-w-xs py-4 bg-blue-600 rounded-xl shadow-lg"
-            >
-              <Text className="text-white font-bold text-center">
-                {t("tasks.completed")}
+          ) : task && task.isCompleted ? (
+            <View className="text-center flex-1 flex-col items-center justify-center">
+              <Text className="text-7xl text-center mb-6">🎉</Text>
+              <Text className="text-3xl font-bold text-gray-900 text-center">
+                {t("home.congratulations")}
               </Text>
-            </TouchableOpacity>
-          </View>
-        ) : task && task.isCompleted ? (
-          <View className="text-center flex-1 flex-col items-center justify-center">
-            <Text className="text-7xl text-center mb-6">🎉</Text>
-            <Text className="text-3xl font-bold text-gray-900 text-center">
-              {t("home.congratulations")}
-            </Text>
-            <Text className="text-gray-600 mt-2 text-center">
-              {t("home.greatDay")}
-            </Text>
-            <TouchableOpacity onPress={handleReset}>
-              <Text className="mt-6 text-blue-500 text-center">
-                {t("home.resetDemo")}
+              <Text className="text-gray-600 mt-2 text-center">
+                {t("home.greatDay")}
               </Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View className="flex-1 justify-center items-center">
-            <EmptyStateScreenInternal
-              date={currentDate}
-              dayLabels={dayLabels}
-              onOpenDialog={() => setIsTaskDialogVisible(true)}
-            />
-          </View>
-        )}
-      </View>
+              <TouchableOpacity onPress={handleReset}>
+                <Text className="mt-6 text-blue-500 text-center">
+                  {t("home.resetDemo")}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View className="flex-1 justify-center items-center">
+              <EmptyStateScreenInternal
+                date={currentDate}
+                dayLabels={dayLabels}
+                onOpenDialog={() => setIsTaskDialogVisible(true)}
+              />
+            </View>
+          )}
+        </Animated.View>
+      </PanGestureHandler>
       <TaskFormDialog
         visible={isTaskDialogVisible}
         onClose={() => setIsTaskDialogVisible(false)}
