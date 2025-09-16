@@ -14,6 +14,7 @@ import { Stack } from "expo-router";
 import { SQLiteProvider } from "expo-sqlite";
 import { Suspense, useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import mobileAds, { MaxAdContentRating } from "react-native-google-mobile-ads";
 import migrations from "../drizzle/migrations";
 import "../global.css";
@@ -100,23 +101,31 @@ function MigrationGate() {
 
   if (error) {
     return (
-      <View>
-        <Text>Migration error: {error.message}</Text>
-      </View>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <View>
+          <Text>Migration error: {error.message}</Text>
+        </View>
+      </GestureHandlerRootView>
     );
   }
 
   if (!success) {
-    return <ActivityIndicator size="large" />;
+    return (
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <ActivityIndicator size="large" />
+      </GestureHandlerRootView>
+    );
   }
 
   return (
-    <SQLiteProvider key={dbVersion} databaseName={DATABASE} useSuspense>
-      <LocalizationProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" options={{ title: "Home" }} />
-        </Stack>
-      </LocalizationProvider>
-    </SQLiteProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SQLiteProvider key={dbVersion} databaseName={DATABASE} useSuspense>
+        <LocalizationProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" options={{ title: "Home" }} />
+          </Stack>
+        </LocalizationProvider>
+      </SQLiteProvider>
+    </GestureHandlerRootView>
   );
 }
