@@ -24,10 +24,9 @@ import { eq, inArray } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import React, { useCallback, useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
-import { PanGestureHandler } from "react-native-gesture-handler";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
-  useAnimatedGestureHandler,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -191,16 +190,16 @@ export default function HomeScreen() {
   }, [currentDate, resetAnimation]);
 
   // アニメーション付きスワイプジェスチャーハンドラー
-  const onSwipeGesture = useAnimatedGestureHandler({
-    onStart: () => {
+  const panGesture = Gesture.Pan()
+    .onStart(() => {
       // ジェスチャー開始時は何もしない
-    },
-    onActive: (event) => {
+    })
+    .onUpdate((event) => {
       // スワイプ中はリアルタイムでアニメーション
       translateX.value = event.translationX;
       opacity.value = Math.max(0.3, 1 - Math.abs(event.translationX) / 200);
-    },
-    onEnd: (event) => {
+    })
+    .onEnd((event) => {
       const threshold = 50; // スワイプの最小距離
       const { translationX } = event;
 
@@ -216,8 +215,7 @@ export default function HomeScreen() {
         // スワイプが不十分な場合は元の位置に戻る
         runOnJS(resetAnimation)();
       }
-    },
-  });
+    });
 
   // 今日以外の日付の場合は空の状態を表示（未使用のため削除）
   return (
@@ -244,7 +242,7 @@ export default function HomeScreen() {
       />
 
       {/* Main Content */}
-      <PanGestureHandler onGestureEvent={onSwipeGesture}>
+      <GestureDetector gesture={panGesture}>
         <Animated.View style={[animatedStyle]} className="flex-1 px-6">
           {task && !task.isCompleted ? (
             <View className="text-center flex-1 flex-col items-center justify-center">
@@ -292,7 +290,7 @@ export default function HomeScreen() {
             </View>
           )}
         </Animated.View>
-      </PanGestureHandler>
+      </GestureDetector>
       <TaskFormDialog
         visible={isTaskDialogVisible}
         onClose={() => setIsTaskDialogVisible(false)}
