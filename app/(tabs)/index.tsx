@@ -1,4 +1,5 @@
 import AdBanner from "@/components/adbanner";
+import { Fireworks } from "@/components/animations/Fireworks";
 import ArrowButton from "@/components/arrow-button";
 import TabHeader from "@/components/screen-header";
 import TaskFormDialog from "@/components/task-form-dialog";
@@ -36,6 +37,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function HomeScreen() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isTaskDialogVisible, setIsTaskDialogVisible] = useState(false);
+  const [showFireworks, setShowFireworks] = useState(false);
   const [currentDate, setCurrentDate] = useState(() => {
     return getTodayISODate(); // YYYY-MM-DD形式で日本時間
   });
@@ -119,6 +121,9 @@ export default function HomeScreen() {
         .update(taskTable)
         .set({ isCompleted: true, updatedAt: new Date().toISOString() })
         .where(eq(taskTable.id, task.id));
+
+      // タスク完了時に花火アニメーションを開始
+      setShowFireworks(true);
     } catch (error) {
       console.error("UPDATE_TASK_FAILED", error);
     }
@@ -131,9 +136,17 @@ export default function HomeScreen() {
         .update(taskTable)
         .set({ isCompleted: false, updatedAt: new Date().toISOString() })
         .where(eq(taskTable.id, task.id));
+
+      // リセット時に花火アニメーションを停止
+      setShowFireworks(false);
     } catch (error) {
       console.error("UPDATE_TASK_FAILED", error);
     }
+  };
+
+  // 花火アニメーション終了時のコールバック
+  const handleFireworksEnd = () => {
+    setShowFireworks(false);
   };
 
   // アニメーション関数を共通化（反動なし）
@@ -191,6 +204,7 @@ export default function HomeScreen() {
 
   // アニメーション付きスワイプジェスチャーハンドラー
   const panGesture = Gesture.Pan()
+    .enabled(!showFireworks) // 花火アニメーション中はスワイプを無効化
     .onStart(() => {
       // ジェスチャー開始時は何もしない
     })
@@ -227,14 +241,14 @@ export default function HomeScreen() {
         leftComponent={
           <ArrowButton
             onPress={handlePrevDay}
-            disabled={!canGoPrev}
+            disabled={!canGoPrev || showFireworks}
             iconName="chevron-back"
           />
         }
         rightComponent={
           <ArrowButton
             onPress={handleNextDay}
-            disabled={!canGoNext}
+            disabled={!canGoNext || showFireworks}
             iconName="chevron-forward"
           />
         }
@@ -274,9 +288,13 @@ export default function HomeScreen() {
               <Text className="text-gray-600 mt-2 text-center">
                 {t("home.greatDay")}
               </Text>
-              <TouchableOpacity onPress={handleReset}>
-                <Text className="mt-6 text-blue-500 text-center">
-                  {t("home.resetDemo")}
+              <TouchableOpacity onPress={handleReset} disabled={showFireworks}>
+                <Text
+                  className={`mt-6 text-center ${
+                    showFireworks ? "text-gray-400" : "text-blue-500"
+                  }`}
+                >
+                  {showFireworks ? "花火中..." : t("home.resetDemo")}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -297,6 +315,25 @@ export default function HomeScreen() {
         date={currentDate}
       />
       <AdBanner />
+
+      {/* 花火アニメーション */}
+      {showFireworks && <Fireworks onAnimationEnd={handleFireworksEnd} />}
+
+      {/* 花火アニメーション中の操作無効化オーバーレイ */}
+      {showFireworks && (
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "transparent",
+            zIndex: 40, // 花火より下、他の要素より上
+          }}
+          pointerEvents="box-none" // タッチイベントを通過させるが、子要素は無効化
+        />
+      )}
     </SafeAreaView>
   );
 }
