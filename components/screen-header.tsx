@@ -27,7 +27,7 @@ export default function TabHeader({
         </View>
 
         {/* Center Content */}
-        <View className="flex-1 items-center justify-center">
+        <View>
           <Text className="text-2xl font-bold text-center text-gray-800">
             {title}
           </Text>
