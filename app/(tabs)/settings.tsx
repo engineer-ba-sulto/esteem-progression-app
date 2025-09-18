@@ -8,52 +8,42 @@ import {
 import TabHeader from "@/components/screen-header";
 import SettingCard from "@/components/setting-card";
 import { deleteAllData, getDatabaseStats } from "@/db/client";
+import { dummyDataManager } from "@/utils/dummy-data-manager";
 import { useLocalization } from "@/utils/localization-context";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Alert, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-interface DatabaseStats {
-  totalTasks: number;
-  completedTasks: number;
-  pendingTasks: number;
-}
-
 export default function SettingsScreen() {
   const { t, locale, changeLocale, getAvailableLocales } = useLocalization();
-  const [databaseStats, setDatabaseStats] = useState<DatabaseStats | null>(
-    null
-  );
   const [isLoading, setIsLoading] = useState(false);
+  const [isDummyDataEnabled, setIsDummyDataEnabled] = useState(false);
 
   // データベース統計を取得
   const loadDatabaseStats = async () => {
     try {
-      const stats = await getDatabaseStats();
-      if (stats.success && "totalTasks" in stats) {
-        setDatabaseStats({
-          totalTasks: stats.totalTasks!,
-          completedTasks: stats.completedTasks!,
-          pendingTasks: stats.pendingTasks!,
-        });
-      }
+      await getDatabaseStats();
     } catch (error) {
       console.error("統計情報の取得に失敗:", error);
     }
   };
 
+  // ダミーデータの状態を取得
+  const loadDummyDataStatus = async () => {
+    try {
+      const enabled = await dummyDataManager.isDummyDataEnabled();
+      setIsDummyDataEnabled(enabled);
+    } catch (error) {
+      console.error("ダミーデータ状態の取得に失敗:", error);
+    }
+  };
+
   useEffect(() => {
     loadDatabaseStats();
+    loadDummyDataStatus();
   }, []);
-
-  const handleHelpPress = () => {
-    console.log("ヘルプとフィードバックがタップされました");
-  };
-
-  const handleLogoutPress = () => {
-    console.log("ログアウトがタップされました");
-  };
 
   const handleLanguagePress = () => {
     const availableLocales = getAvailableLocales();
@@ -119,6 +109,54 @@ export default function SettingsScreen() {
     }
   };
 
+  const handleDummyDataToggle = async () => {
+    const action = isDummyDataEnabled ? "無効" : "有効";
+    const currentLanguage = locale === "ja" ? "日本語" : "English";
+
+    Alert.alert(
+      `ダミーデータを${action}にしますか？`,
+      isDummyDataEnabled
+        ? "現在のデータが削除され、空の状態になります。"
+        : `現在のデータが削除され、${currentLanguage}のサンプルデータが追加されます。`,
+      [
+        {
+          text: "キャンセル",
+          style: "cancel",
+        },
+        {
+          text: action,
+          onPress: async () => {
+            setIsLoading(true);
+            try {
+              const success = await dummyDataManager.toggleDummyData(locale);
+
+              if (success) {
+                setIsDummyDataEnabled(!isDummyDataEnabled);
+                await loadDatabaseStats();
+                Alert.alert("完了", `ダミーデータが${action}になりました。`, [
+                  { text: "OK" },
+                ]);
+              } else {
+                Alert.alert(
+                  "エラー",
+                  "ダミーデータの切り替えに失敗しました。",
+                  [{ text: "OK" }]
+                );
+              }
+            } catch (error) {
+              console.error("ダミーデータ切り替えエラー:", error);
+              Alert.alert("エラー", "予期しないエラーが発生しました。", [
+                { text: "OK" },
+              ]);
+            } finally {
+              setIsLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <SafeAreaView className="flex flex-col h-full bg-blue-50" edges={["top"]}>
       {/* Header */}
@@ -163,6 +201,19 @@ export default function SettingsScreen() {
               disabled={isLoading}
             />
           </View>
+          {__DEV__ && (
+            <View>
+              <Text className="px-4 mt-6 text-sm font-semibold text-gray-500 mb-2">
+                開発・テスト
+              </Text>
+              <SettingCard
+                icon={<Ionicons name="flask" size={20} color="#6B7280" />}
+                label={`ダミーデータ ${isDummyDataEnabled ? "無効化" : "有効化"}${isLoading ? " (処理中...)" : ""}`}
+                onPress={handleDummyDataToggle}
+                disabled={isLoading}
+              />
+            </View>
+          )}
           {/* <View>
             <Text className="px-4 mt-6 text-sm font-semibold text-gray-500 mb-2">
               {t("settings.support")}
